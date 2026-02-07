@@ -80,9 +80,9 @@ export default function Home() {
 
           {/* Main Options */}
           <div className="grid md:grid-cols-2 gap-6">
-            {/* Pairing Option */}
+            {/* Pairing Option - Simple */}
             <a
-              href="/tv.html"
+              href="/tv-simple.html"
               className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 hover:border-green-500 rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
             >
               <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">📺</div>
@@ -90,11 +90,30 @@ export default function Home() {
                 Parear TV
               </h2>
               <p className="text-slate-400">
-                Use o celular para adicionar credenciais sem digitar na TV
+                Use código de 6 dígitos - Funciona em qualquer plataforma!
               </p>
               {isTV && (
                 <div className="mt-4 text-green-400 font-medium text-sm">
                   ⭐ Recomendado para TV
+                </div>
+              )}
+            </a>
+
+            {/* Connect Normally - Traditional Method */}
+            <a
+              href="/tv-normal.html"
+              className="bg-slate-800/50 border-2 border-slate-700 hover:border-blue-500 rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
+            >
+              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">⌨</div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Conectar Direto
+              </h2>
+              <p className="text-slate-400">
+                Digite suas credenciais na TV (tradicional)
+              </p>
+              {isTV && (
+                <div className="mt-4 text-blue-400 font-medium text-sm">
+                  🎯 Método mais simples
                 </div>
               )}
             </a>
