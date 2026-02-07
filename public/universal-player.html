@@ -295,13 +295,22 @@ Senha: senha"></textarea>
 
         function log(msg) {
             const logBox = document.getElementById('log-output');
+            if (!logBox) return; // Verificar se existe
+
             const time = new Date().toLocaleTimeString();
             logBox.innerHTML += `<div class="log-entry">[${time}] ${msg}</div>`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        function show(id) { document.getElementById(id).classList.remove('hidden'); }
-        function hide(id) { document.getElementById(id).classList.add('hidden'); }
+        function show(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function hide(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
 
         // Carregar credenciais dos parâmetros URL (do pareamento)
         function loadCredentialsFromURL() {
