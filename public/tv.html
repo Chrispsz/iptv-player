@@ -389,8 +389,22 @@
             });
         }
 
-        // Conectar ao Socket.io
+        // Verificar se está em ambiente que suporta Socket.io
+        function isSocketIOEnvironment() {
+            const hostname = window.location.hostname;
+            // Socket.io só funciona em localhost com pairing-service
+            return hostname === 'localhost' || hostname === '127.0.0.1';
+        }
+
+        // Conectar ao Socket.io (só se ambiente suportar)
         function connectToServer() {
+            // Não tenta Socket.io no Vercel/outros ambientes serverless
+            if (!isSocketIOEnvironment()) {
+                console.log('🌐 Ambiente Vercel detectedo - Socket.io desativado');
+                console.log('📥 Usando apenas pareamento por URL parameters');
+                return;
+            }
+
             console.log('🔗 Conectando ao servidor de pareamento...');
 
             // Atualizar indicador: servidor aguardando
@@ -582,8 +596,33 @@
             // Verificar se já tem credenciais salvas (pareamento permanente)
             checkSavedCredentials();
 
-            // Se não tem, iniciar pareamento normal
-            connectToServer();
+            // Se está em Vercel (sem Socket.io), mostrar instruções
+            if (!isSocketIOEnvironment()) {
+                console.log('🌐 Vercel - Iniciando modo URL parameters');
+                console.log('📥 Para conectar, use: /tv.html?host=SERVIDOR:PORTA&user=USUARIO&pass=SENHA');
+                updateStatus('yellow', 'yellow', 'gray');
+                updateStatusText('🌐 Vercel detectado - Use URL parameters para conectar', '');
+
+                // Mostrar instruções
+                const codeElement = document.getElementById('session-code');
+                if (codeElement) {
+                    codeElement.innerHTML = `
+                        <div style="font-size: 18px; margin-bottom: 12px;">Use URL Parameters</div>
+                        <div style="font-size: 12px; opacity: 0.8;">
+                            /tv.html?host=SERVER:PORT<br>
+                            &user=USERNAME<br>
+                            &pass=PASSWORD
+                        </div>
+                    `;
+                }
+
+                // Esconder countdown e QR
+                const countdownEl = document.getElementById('countdown');
+                if (countdownEl) countdownEl.style.display = 'none';
+            } else {
+                // Se está em localhost, iniciar pareamento normal
+                connectToServer();
+            }
         });
     </script>
 </body>
