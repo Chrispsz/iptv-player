@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Parear TV - Simplificado</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        .logo { font-size: 64px; margin-bottom: 16px; }
+        .title { font-size: 32px; font-weight: 700; margin-bottom: 12px; }
+        .subtitle { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 32px; }
+
+        .code-display {
+            background: rgba(255,255,255,0.1);
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 30px 50px;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+        .code-display .code {
+            font-size: 56px;
+            font-weight: 700;
+            letter-spacing: 8px;
+            font-family: monospace;
+        }
+        .code-display .label {
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .timer { font-size: 16px; color: rgba(255,255,255,0.6); margin-bottom: 32px; }
+
+        .status { font-size: 18px; font-weight: 600; margin-bottom: 24px; }
+        .status.error { color: #ef4444; }
+        .status.success { color: #22c55e; }
+
+        .button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        .button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+        .button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .link { display: block; text-align: center; margin-top: 16px; color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; }
+        .link:hover { color: #3b82f6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">📺</div>
+        <div class="title">Parear TV</div>
+        <div class="subtitle">Código de 6 dígitos para conexão</div>
+
+        <div class="code-display" id="code-container">
+            <div class="label">Código</div>
+            <div class="code" id="pair-code">------</div>
+        </div>
+
+        <div class="timer" id="timer">Expira em: 30:00</div>
+
+        <div id="status" class="status">Aguardando credenciais...</div>
+
+        <a href="/universal-player.html" class="link">← Voltar para o Player</a>
+    </div>
+
+    <script>
+        let pairCode = '';
+        let countdownSeconds = 30 * 60; // 30 minutos
+        let timerInterval = null;
+
+        // Gerar código único de 6 dígitos
+        function generateCode() {
+            const chars = '0123456789';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return code;
+        }
+
+        // Atualizar timer
+        function updateTimer() {
+            const minutes = Math.floor(countdownSeconds / 60);
+            const seconds = countdownSeconds % 60;
+            document.getElementById('timer').textContent = `Expira em: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        // Iniciar countdown
+        function startTimer() {
+            countdownSeconds = 30 * 60;
+            updateTimer();
+
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                countdownSeconds--;
+                updateTimer();
+
+                if (countdownSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    generateNewCode();
+                }
+            }, 1000);
+        }
+
+        // Gerar novo código
+        function generateNewCode() {
+            pairCode = generateCode();
+            document.getElementById('pair-code').textContent = pairCode;
+            updateStatus('Novo código gerado! Aguardando...', '');
+            startTimer();
+            clearCredentials();
+        }
+
+        // Limpar credenciais antigas
+        function clearCredentials() {
+            localStorage.removeItem('iptv_paired_credentials');
+            localStorage.removeItem('iptv_code');
+        }
+
+        // Salvar credenciais
+        function saveCredentials(host, username, password) {
+            const credentials = {
+                host, username, password,
+                pairedAt: new Date().toISOString()
+            };
+            localStorage.setItem('iptv_paired_credentials', JSON.stringify(credentials));
+            
+            // Salvar código para validação
+            localStorage.setItem('iptv_code', pairCode);
+        }
+
+        // Atualizar status
+        function updateStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+        }
+
+        // Gerar QR Code
+        function generateQR() {
+            try {
+                const container = document.getElementById('qr-container');
+                if (!container) return;
+
+                container.innerHTML = '<div id="qr-code"></div>';
+
+                if (typeof QRCode !== 'undefined') {
+                    // URL completa para o player com credenciais
+                    const baseUrl = window.location.origin;
+                    const playerUrl = `${baseUrl}/universal-player.html?host=${pairCode}`;
+                    
+                    new QRCode(document.getElementById('qr-code'), {
+                        text: playerUrl,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
+                    });
+
+                    console.log('✅ QR Code gerado:', playerUrl);
+                    updateStatus('Credenciais prontas! Escaneie o QR ou use o código.', 'success');
+                } else {
+                    updateStatus('QRCode library não carregada', 'error');
+                }
+            } catch (e) {
+                console.error('Erro ao gerar QR:', e);
+                updateStatus('Erro ao gerar QR Code', 'error');
+            }
+        }
+
+        // Iniciar
+        window.addEventListener('load', () => {
+            console.log('🚀 Iniciando sistema de pareamento simplificado');
+            
+            // Gerar código inicial
+            pairCode = generateCode();
+            document.getElementById('pair-code').textContent = pairCode;
+            
+            // Iniciar timer
+            startTimer();
+            
+            // Gerar QR Code
+            generateQR();
+        });
+    </script>
+</body>
+</html>
