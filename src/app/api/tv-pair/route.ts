@@ -2,73 +2,250 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
+// Interface para sessão de pareamento
+interface PairingSession {
+  code: string;
+  status: 'pending' | 'connected' | 'completed';
+  createdAt: number;
+  credentials?: {
+    host: string;
+    username: string;
+    password: string;
+    m3uUrl: string;
+  };
+}
+
 // Armazenamento em memória (em produção usar Redis/Database)
-const credentialsStore = new Map<string, any>();
+// Usar globalThis para persistir entre requests em serverless
+const getStore = () => {
+  if (!(globalThis as any).pairingStore) {
+    (globalThis as any).pairingStore = new Map<string, PairingSession>();
+  }
+  return (globalThis as any).pairingStore as Map<string, PairingSession>;
+};
+
 const EXPIRY_TIME = 30 * 60 * 1000; // 30 minutos em ms
 
-// Limpar credenciais expiradas
+// Limpar sessões expiradas
 function cleanExpired() {
+  const store = getStore();
   const now = Date.now();
-  for (const [code, data] of credentialsStore.entries()) {
-    if (now - data.createdAt > EXPIRY_TIME) {
-      credentialsStore.delete(code);
-      console.log(`🗑️ Código expirado: ${code}`);
+
+  for (const [code, session] of store.entries()) {
+    if (now - session.createdAt > EXPIRY_TIME) {
+      store.delete(code);
+      console.log(`🗑️ Sessão expirada: ${code}`);
     }
   }
 }
 
-// Endpoint para celular enviar credenciais
+// Gerar código único de 3 dígitos
+function generateCode(): string {
+  return Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0');
+}
+
+// Verificar se código já existe
+function isCodeAvailable(code: string): boolean {
+  const store = getStore();
+  const session = store.get(code);
+  if (!session) return true;
+
+  // Se código existe mas está completado/expirado, pode reusar
+  const age = Date.now() - session.createdAt;
+  if (age > EXPIRY_TIME || session.status === 'completed') {
+    store.delete(code);
+    return true;
+  }
+
+  return false;
+}
+
+// POST /api/tv-pair - Gerar nova sessão (TV)
+// POST /api/tv-pair/connect - Conectar à sessão (Celular)
+// POST /api/tv-pair/credentials - Enviar credenciais (Celular)
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { host, username, password } = body;
+    const { searchParams } = new URL(request.url);
+    const action = searchParams.get('action');
 
-    if (!host || !username || !password) {
-      return NextResponse.json(
-        { error: 'Missing credentials' },
-        { status: 400 }
-      );
+    let body;
+    try {
+      body = await request.json();
+    } catch (e) {
+      // Body pode estar vazio ou inválido
+      body = {};
     }
 
     // Limpar expirados
     cleanExpired();
 
-    // Gerar código único de 6 dígitos
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    // ============================================
+    // ACTION: generate - TV gera novo código
+    // ============================================
+    if (action === 'generate') {
+      let code: string;
+      let attempts = 0;
+      const maxAttempts = 100;
 
-    // Salvar credenciais
-    credentialsStore.set(code, {
-      host,
-      username,
-      password,
-      createdAt: Date.now(),
-    });
+      // Tentar gerar código único
+      do {
+        code = generateCode();
+        attempts++;
+      } while (!isCodeAvailable(code) && attempts < maxAttempts);
 
-    console.log(`📥 Credenciais salvas para código: ${code}`);
+      if (!isCodeAvailable(code)) {
+        return NextResponse.json(
+          { error: 'Não foi possível gerar código único' },
+          { status: 500 }
+        );
+      }
 
-    return NextResponse.json({
-      success: true,
-      code,
-      expiresIn: EXPIRY_TIME / 1000, // em segundos
-    });
-  } catch (error) {
-    console.error('Erro ao salvar credenciais:', error);
+      const store = getStore();
+
+      // Criar nova sessão
+      const session: PairingSession = {
+        code,
+        status: 'pending',
+        createdAt: Date.now(),
+      };
+
+      store.set(code, session);
+      console.log(`📺 Sessão criada: ${code}`);
+
+      return NextResponse.json({
+        success: true,
+        code,
+        expiresIn: EXPIRY_TIME / 1000, // em segundos
+      });
+    }
+
+    // ============================================
+    // ACTION: connect - Celular conecta ao código
+    // ============================================
+    if (action === 'connect') {
+      const { code } = body;
+
+      if (!code || code.length !== 3) {
+        return NextResponse.json(
+          { error: 'Código inválido. Use 3 dígitos.' },
+          { status: 400 }
+        );
+      }
+
+      const store = getStore();
+      const session = store.get(code);
+
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Código não encontrado ou expirado. Gere novo código na TV.' },
+          { status: 404 }
+        );
+      }
+
+      // Se já completado, não pode reconectar
+      if (session.status === 'completed') {
+        return NextResponse.json(
+          { error: 'Esta TV já está configurada. Gere novo código.' },
+          { status: 409 }
+        );
+      }
+
+      // Atualizar status para connected
+      session.status = 'connected';
+      store.set(code, session);
+      console.log(`📱 Celular conectou à sessão: ${code}`);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Conectado à TV. Aguardando credenciais...',
+      });
+    }
+
+    // ============================================
+    // ACTION: credentials - Celular envia credenciais
+    // ============================================
+    if (action === 'credentials') {
+      const { code, credentials } = body;
+
+      if (!code || code.length !== 3) {
+        return NextResponse.json(
+          { error: 'Código inválido' },
+          { status: 400 }
+        );
+      }
+
+      if (!credentials || !credentials.host || !credentials.username || !credentials.password) {
+        return NextResponse.json(
+          { error: 'Credenciais incompletas' },
+          { status: 400 }
+        );
+      }
+
+      const store = getStore();
+      const session = store.get(code);
+
+      if (!session) {
+        return NextResponse.json(
+          { error: 'Código não encontrado ou expirado' },
+          { status: 404 }
+        );
+      }
+
+      if (session.status === 'completed') {
+        return NextResponse.json(
+          { error: 'Esta TV já está configurada' },
+          { status: 409 }
+        );
+      }
+
+      // Salvar credenciais
+      session.credentials = {
+        host: credentials.host,
+        username: credentials.username,
+        password: credentials.password,
+        m3uUrl: credentials.m3uUrl || '',
+      };
+      session.status = 'completed';
+      store.set(code, session);
+
+      console.log(`✅ Credenciais enviadas para sessão: ${code}`);
+      console.log(`   Host: ${credentials.host}`);
+      console.log(`   Usuário: ${credentials.username}`);
+
+      return NextResponse.json({
+        success: true,
+        message: 'Credenciais enviadas para TV com sucesso!',
+      });
+    }
+
+    // ============================================
+    // ACTION desconhecida
+    // ============================================
     return NextResponse.json(
-      { error: 'Internal server error', message: String(error) },
+      { error: 'Ação inválida. Use: generate, connect, ou credentials' },
+      { status: 400 }
+    );
+
+  } catch (error) {
+    console.error('❌ Erro na API tv-pair:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }
 }
 
-// Endpoint para TV consultar credenciais pelo código
+// GET /api/tv-pair?code=123 - Consultar status da sessão (TV)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
 
-    if (!code) {
+    if (!code || code.length !== 3) {
       return NextResponse.json(
-        { error: 'Missing code' },
+        { error: 'Código inválido' },
         { status: 400 }
       );
     }
@@ -76,33 +253,44 @@ export async function GET(request: NextRequest) {
     // Limpar expirados
     cleanExpired();
 
-    // Buscar credenciais
-    const credentials = credentialsStore.get(code);
+    const store = getStore();
+    const session = store.get(code);
 
-    if (!credentials) {
+    if (!session) {
       return NextResponse.json(
-        { error: 'Code not found or expired' },
+        { error: 'Código não encontrado ou expirado' },
         { status: 404 }
       );
     }
 
-    const age = Date.now() - credentials.createdAt;
+    const age = Date.now() - session.createdAt;
     const remaining = Math.max(0, EXPIRY_TIME - age);
 
-    console.log(`📤 Credenciais consultadas para código: ${code}, restante: ${Math.floor(remaining/1000)}s`);
+    // Se expirou
+    if (remaining === 0) {
+      store.delete(code);
+      return NextResponse.json(
+        { error: 'Código expirado' },
+        { status: 410 }
+      );
+    }
 
-    return NextResponse.json({
+    const response = {
       success: true,
-      credentials: {
-        host: credentials.host,
-        username: credentials.username,
-        password: credentials.password,
-      },
+      code: session.code,
+      status: session.status,
+      hasCredentials: !!session.credentials,
+      credentials: session.credentials || null,
       remaining: Math.floor(remaining / 1000), // em segundos
-    });
+    };
+
+    console.log(`📤 Status consultado para código: ${code}, status: ${session.status}`);
+
+    return NextResponse.json(response);
+
   } catch (error) {
-    console.error('Erro ao consultar credenciais:', error);
-    return NextResponse route.ts
+    console.error('❌ Erro ao consultar status:', error);
+    return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
     );
