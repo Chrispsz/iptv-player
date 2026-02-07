@@ -57,7 +57,8 @@ export function usePlayer() {
     const videoElement = videoRef.current
     const streamUrl = currentChannel.url
 
-    cleanup()
+    // Use setTimeout to avoid setState synchronous calls in effect
+    setTimeout(() => cleanup(), 0)
 
     const isHls = streamUrl.includes('.m3u8') || streamUrl.includes('m3u8')
 
@@ -134,9 +135,12 @@ export function usePlayer() {
       })
     } else {
       console.error('❌ Navegador não suporta HLS')
-      setError('Seu navegador não suporta HLS. Tente usar Chrome, Firefox ou Edge.')
-      setIsBuffering(false)
-      setIsPlaying(false)
+      // Use setTimeout to avoid setState synchronous calls in effect
+      setTimeout(() => {
+        setError('Seu navegador não suporta HLS. Tente usar Chrome, Firefox ou Edge.')
+        setIsBuffering(false)
+        setIsPlaying(false)
+      }, 0)
     }
     
     return () => {
