@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV Brasil - Transmissão Universal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+        }
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .device-info {
+            background: rgba(34, 197, 94, 0.15);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .device-icon {
+            font-size: 32px;
+        }
+        .device-text {
+            font-size: 16px;
+        }
+        .device-badge {
+            background: #22c55e;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: auto;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 18px;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.5);
+        }
+        .button {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 20px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 100%;
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-btn:hover {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            transform: translateX(4px);
+        }
+        .channel-list {
+            max-height: 500px;
+            overflow-y: auto;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .channel-item {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .channel-item:hover {
+            background: #2563eb;
+            border-color: #3b82f6;
+            transform: translateX(4px);
+        }
+        .channel-item.selected {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            border-color: #60a5fa;
+        }
+        .selected-channel {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-top: 20px;
+            border: 2px solid #60a5fa;
+        }
+        .selected-channel-name {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+        .url-display {
+            background: #0f172a;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            word-break: break-all;
+            margin-bottom: 20px;
+            color: #60a5fa;
+        }
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .player-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .player-card:hover {
+            border-color: #60a5fa;
+            background: rgba(96, 165, 250, 0.1);
+            transform: translateY(-4px);
+        }
+        .player-card.universal {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.1);
+        }
+        .player-card.universal:hover {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.2);
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+        }
+        .player-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+        .player-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .player-description {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .universal-badge {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #60a5fa;
+            font-size: 20px;
+        }
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top: 5px solid #60a5fa;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .log-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        .log-time {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            min-width: 80px;
+        }
+        .log-type {
+            color: #60a5fa;
+            font-weight: 600;
+            min-width: 100px;
+        }
+        .status-success {
+            color: #4ade80;
+        }
+        .status-error {
+            color: #f87171;
+        }
+        .status-warning {
+            color: #fbbf24;
+        }
+        .hidden {
+            display: none;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-top: 16px;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            z-index: 10000;
+            font-size: 16px;
+            animation: slideDown 0.3s ease-out;
+        }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">📺 IPTV Brasil - Transmissão Universal</div>
+            <div class="subtitle">Abre em múltiplos players automaticamente</div>
+        </div>
+
+        <!-- Info de Dispositivo -->
+        <div class="device-info">
+            <div class="device-icon" id="device-icon">📱</div>
+            <div class="device-text">
+                <strong>Plataforma:</strong> <span id="platform-name">Detectando...</span>
+            </div>
+            <div class="device-badge" id="os-badge">Android</div>
+        </div>
+
+        <!-- Conexão -->
+        <div id="connection-section">
+            <div class="card">
+                <div class="card-title">📡 Conectar ao Servidor</div>
+                <textarea
+                    id="credentials-input"
+                    placeholder="Cole suas credenciais aqui...
+
+Exemplo:
+Servidor: tv14s.xyz:8080
+Usuário: KD3zn5
+Senha: 468612
+
+OU URL M3U Completa:"
+                ></textarea>
+                <button id="connect-btn" onclick="connect()">🔗 CONECTAR</button>
+            </div>
+        </div>
+
+        <!-- Categorias -->
+        <div id="categories-section" class="hidden">
+            <div class="card">
+                <div class="card-title">📺 Categorias Brasileiras</div>
+                <div id="categories-grid" class="categories-grid"></div>
+            </div>
+        </div>
+
+        <!-- Canais -->
+        <div id="channels-section" class="hidden">
+            <div class="card">
+                <div class="card-title">📺 Canais</div>
+                <div style="margin-bottom: 16px; color: rgba(255,255,255,0.7);">
+                    Selecione um canal para transmitir
+                </div>
+                <div id="channel-list-items" class="channel-list"></div>
+            </div>
+        </div>
+
+        <!-- Canal Selecionado -->
+        <div id="selected-channel" class="selected-channel hidden">
+            <div class="selected-channel-name" id="channel-name">Canal Selecionado</div>
+            <div style="margin-bottom: 12px; font-weight: 600;">URL do Stream:</div>
+            <div class="url-display" id="stream-url">...</div>
+
+            <div class="card-title" style="font-size: 18px; margin-bottom: 20px;">🎮 Abrir em Player:</div>
+
+            <div class="players-grid">
+                <!-- Botão Universal -->
+                <div class="player-card universal" onclick="universalCast()">
+                    <div class="universal-badge">🚀 UNIVERSAL</div>
+                    <div class="player-icon">📡</div>
+                    <div class="player-name">Transmissão Universal</div>
+                    <div class="player-description">Tenta todos os métodos automaticamente</div>
+                </div>
+
+                <!-- Web Video Caster -->
+                <div class="player-card" onclick="openInWebVideoCaster()">
+                    <div class="player-icon">📺</div>
+                    <div class="player-name">Web Video Caster</div>
+                    <div class="player-description">Smart TV / Chromecast</div>
+                </div>
+
+                <!-- VLC -->
+                <div class="player-card" onclick="openInVLC()">
+                    <div class="player-icon">🍊</div>
+                    <div class="player-name">VLC</div>
+                    <div class="player-description">Android/iOS/Windows/Mac</div>
+                </div>
+
+                <!-- IPTV Smarters -->
+                <div class="player-card" onclick="openInSmarters()">
+                    <div class="player-icon">🎯</div>
+                    <div class="player-name">IPTV Smarters</div>
+                    <div class="player-description">Android/iOS/TV Box</div>
+                </div>
+
+                <!-- Copiar URL -->
+                <div class="player-card" onclick="copyUrl()">
+                    <div class="player-icon">📋</div>
+                    <div class="player-name">Copiar URL</div>
+                    <div class="player-description">Colar manualmente</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <div>Carregando...</div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-box">
+            <div style="margin-bottom: 12px; color: #60a5fa; font-weight: 700;">📋 Log de Atividade</div>
+            <div id="log-output">Aguardando ações...</div>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let host = '';
+        let username = '';
+        let password = '';
+        let categories = [];
+        let allChannels = [];
+        let selectedChannel = null;
+        let platform = 'unknown';
+
+        const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries', 'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
+        const BRAZIL_KEYWORDS = ['brasil', 'brazil', 'brasileira', 'brasileiro', 'globo', 'record', 'sbt', 'band', 'rede', 'aberta', 'aberto', 'são paulo', 'rio', 'minas', 'bahia', 'paraná', 'catarinense', 'gaúcha', 'brasília', 'df', 'sp', 'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'pe', 'go', 'es', 'ce', 'am', 'pa', 'rn'];
+
+        // Detectar plataforma
+        function detectPlatform() {
+            const userAgent = navigator.userAgent;
+            let platform = 'desktop';
+            let os = 'Unknown';
+            let icon = '💻';
+
+            // Detectar SO
+            if (/Android/i.test(userAgent)) {
+                os = 'Android';
+                platform = 'android';
+                icon = '🤖';
+            } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                os = 'iOS';
+                platform = 'ios';
+                icon = '🍎';
+            } else if (/Windows/i.test(userAgent)) {
+                os = 'Windows';
+                icon = '🪟';
+            } else if (/Mac/i.test(userAgent)) {
+                os = 'macOS';
+                icon = '🍎';
+            } else if (/Linux/i.test(userAgent)) {
+                os = 'Linux';
+                icon = '🐧';
+            }
+
+            return { platform, os, icon, userAgent };
+        }
+
+        // Inicializar detecção de plataforma
+        window.onload = function() {
+            const { os, icon, userAgent } = detectPlatform();
+            platform = os.toLowerCase();
+
+            document.getElementById('device-icon').textContent = icon;
+            document.getElementById('platform-name').textContent = os;
+            document.getElementById('os-badge').textContent = platform === 'android' ? 'Android' : 
+                                                            platform === 'ios' ? 'iOS' : 
+                                                            'Desktop';
+
+            log(`Plataforma detectada: ${os}`, 'info');
+            log(`User Agent: ${userAgent.substring(0, 100)}...`, 'info');
+            log('✅ Sistema inicializado. Pronto para conectar.', 'success');
+        };
+
+        // Funções auxiliares
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function log(message, type = 'info') {
+            const logBox = document.getElementById('log-output');
+            const time = new Date().toLocaleTimeString();
+            const icons = {
+                info: 'ℹ️',
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+
+            logBox.innerHTML += `<div class="log-entry">
+                <span class="log-time">[${time}]</span>
+                <span class="log-type status-${type}">${icons[type]}</span>
+                <span>${message}</span>
+            </div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function setLoading(loading) {
+            const loadingEl = document.getElementById('loading');
+            if (loading) {
+                loadingEl.classList.remove('hidden');
+            } else {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        function showToast(message, duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // Proxy do backend
+        async function proxyFetch(targetUrl) {
+            const proxyUrl = `/api/iptv/proxy?url=${encodeURIComponent(targetUrl)}`;
+            log(`🔄 Proxy request: ${targetUrl.substring(0, 80)}...`, 'info');
+
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) {
+                    throw new Error(`Proxy returned ${response.status}`);
+                }
+                return await response.json();
+            } catch (e) {
+                log(`❌ Proxy failed: ${e.message}`, 'error');
+                throw e;
+            }
+        }
+
+        // Parser de credenciais
+        function parseCredentials(text) {
+            const lines = text.split('\n');
+            let extractedHost = '';
+            let extractedUser = '';
+            let extractedPass = '';
+
+            lines.forEach(line => {
+                const lower = line.toLowerCase().trim();
+                if (lower.includes('servidor:') || lower.includes('*servidor:')) {
+                    const match = line.match(/[:*]\s*([^:\s]+)/);
+                    if (match) extractedHost = match[1].trim();
+                }
+                if (lower.includes('m3u+:')) {
+                    const urlMatch = line.match(/https?:\/\/([^\/]+)/);
+                    if (urlMatch) extractedHost = urlMatch[1].trim();
+                }
+                if (lower.includes('usuário:') || lower.includes('usuario:') || lower.includes('*usuário:') || lower.includes('*usuario:')) {
+                    const match = line.match(/[:*]\s*([^\s]+)/);
+                    if (match) extractedUser = match[1].trim();
+                }
+                if (lower.includes('senha:') || lower.includes('*senha:')) {
+                    const match = line.match(/[:*]\s*([^\s]+)/);
+                    if (match) extractedPass = match[1].trim();
+                }
+            });
+
+            return { host: extractedHost, username: extractedUser, password: extractedPass };
+        }
+
+        // Conectar
+        async function connect() {
+            const text = document.getElementById('credentials-input').value.trim();
+            if (!text) {
+                showToast('Por favor, cole suas credenciais');
+                return;
+            }
+
+            const creds = parseCredentials(text);
+            if (!creds.host || !creds.username || !creds.password) {
+                showToast('Não foi possível extrair as credenciais');
+                return;
+            }
+
+            host = creds.host;
+            username = creds.username;
+            password = creds.password;
+
+            setLoading(true);
+            hideElement('categories-section');
+            hideElement('channels-section');
+            hideElement('selected-channel');
+
+            try {
+                const cleanHost = host.split(':')[0];
+                const baseUrl = `http://${cleanHost}:80`;
+
+                log(`🔗 Conectando em: ${baseUrl}`, 'info');
+
+                const categoriesUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_categories`;
+                const data = await proxyFetch(categoriesUrl);
+
+                if (Array.isArray(data)) {
+                    log(`✓ Recebidas ${data.length} categorias`, 'success');
+
+                    categories = data.filter(cat => {
+                        const name = (cat.category_name || '').toLowerCase();
+                        const isExcluded = EXCLUDED_CATS.some(e => name.includes(e));
+                        const isBrazilian = BRAZIL_KEYWORDS.some(kw => name.includes(kw));
+                        return isBrazilian && !isExcluded;
+                    });
+
+                    if (categories.length === 0) {
+                        throw new Error('Nenhuma categoria brasileira encontrada');
+                    }
+
+                    renderCategories();
+                    showElement('categories-section');
+                    log(`✓ ${categories.length} categorias carregadas!`, 'success');
+                } else {
+                    throw new Error('Resposta inválida do servidor');
+                }
+
+            } catch (err) {
+                showToast(`Erro: ${err.message}`);
+                log(`❌ ${err.message}`, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Renderizar categorias
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = categories.map(cat => `
+                <button class="category-btn" onclick="loadStreams('${cat.category_id}', '${cat.category_name}')">
+                    ${cat.category_name}
+                </button>
+            `).join('');
+        }
+
+        // Carregar canais
+        async function loadStreams(categoryId, categoryName) {
+            setLoading(true);
+            hideElement('channels-section');
+            hideElement('selected-channel');
+
+            log(`📺 Carregando canais: ${categoryName}`, 'info');
+
+            try {
+                const cleanHost = host.split(':')[0];
+                const baseUrl = `http://${cleanHost}:80`;
+
+                const streamsUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${categoryId}`;
+                const data = await proxyFetch(streamsUrl);
+
+                if (Array.isArray(data)) {
+                    log(`✓ Recebidos ${data.length} canais`, 'success');
+
+                    allChannels = data.map(s => ({
+                        id: s.stream_id,
+                        name: s.name,
+                        url: `${baseUrl}/live/${username}/${password}/${s.stream_id}.m3u8`
+                    }));
+
+                    renderChannels();
+                    showElement('channels-section');
+                    log(`✓ ${allChannels.length} canais carregados!`, 'success');
+                } else {
+                    throw new Error('Resposta inválida do servidor');
+                }
+
+            } catch (err) {
+                showToast(`Erro: ${err.message}`);
+                log(`❌ ${err.message}`, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Renderizar canais
+        function renderChannels() {
+            const list = document.getElementById('channel-list-items');
+
+            if (allChannels.length === 0) {
+                list.innerHTML = '<div style="padding: 24px; text-align: center; color: rgba(255,255,255,0.5);">Nenhum canal encontrado</div>';
+                return;
+            }
+
+            list.innerHTML = allChannels.map(ch => `
+                <div class="channel-item" onclick="selectChannel('${ch.id}', '${ch.name}', '${ch.url}')">
+                    <div style="font-weight: 600; font-size: 18px; margin-bottom: 4px;">${ch.name}</div>
+                    <div style="font-size: 13px; color: rgba(255,255,255,0.6);">ID: ${ch.id}</div>
+                </div>
+            `).join('');
+        }
+
+        // Selecionar canal
+        function selectChannel(id, name, url) {
+            selectedChannel = { id, name, url };
+
+            log(`📺 Canal selecionado: ${name}`, 'info');
+
+            document.getElementById('channel-name').textContent = name;
+            document.getElementById('stream-url').textContent = url;
+
+            // Marcar como selecionado
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+
+            showElement('selected-channel');
+            
+            // Scroll para o canal selecionado
+            document.getElementById('selected-channel').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ============================================
+        // MÉTODOS DE TRANSMISSÃO UNIVERSAL
+        // ============================================
+
+        // 1. TRANSMISSÃO UNIVERSAL (tenta todos os métodos)
+        function universalCast() {
+            if (!selectedChannel) {
+                showToast('Selecione um canal primeiro');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            log(`🚀 Iniciando Transmissão Universal...`, 'info');
+            log(`   Canal: ${selectedChannel.name}`, 'info');
+
+            let success = false;
+            const methods = [];
+
+            // Método 1: Web Video Caster (CORRIGIDO)
+            try {
+                log(`   Tentando Web Video Caster...`, 'info');
+                const wvcUrl = `wvc-x-callback://open?url=${encodeURIComponent(url)}`;
+                window.location.href = wvcUrl;
+                methods.push('Web Video Caster');
+                success = true;
+            } catch (e) {
+                log(`   Web Video Caster falhou: ${e.message}`, 'warning');
+            }
+
+            // Se WVC falhou e for mobile, tentar outros
+            if (!success && platform !== 'desktop') {
+                // Método 2: VLC (Android)
+                if (platform === 'android') {
+                    try {
+                        log(`   Tentando VLC Android...`, 'info');
+                        const vlcUrl = `vlc://${url}`;
+                        window.location.href = vlcUrl;
+                        methods.push('VLC Android');
+                        success = true;
+                    } catch (e) {
+                        log(`   VLC Android falhou: ${e.message}`, 'warning');
+                    }
+                }
+
+                // Método 3: VLC (iOS) - usa x-callback
+                if (platform === 'ios') {
+                    try {
+                        log(`   Tentando VLC iOS...`, 'info');
+                        const vlcUrl = `vlc-x-callback://x-callback-url/${encodeURIComponent(url)}`;
+                        window.location.href = vlcUrl;
+                        methods.push('VLC iOS');
+                        success = true;
+                    } catch (e) {
+                        log(`   VLC iOS falhou: ${e.message}`, 'warning');
+                    }
+                }
+            }
+
+            // Método 4: Intent Android universal
+            if (!success && platform === 'android') {
+                try {
+                    log(`   Tentando Intent universal Android...`, 'info');
+                    const intentUrl = `intent://${url}#Intent;scheme=http;type=video/mp2t;end`;
+                    window.location.href = intentUrl;
+                    methods.push('Intent Android');
+                    success = true;
+                } catch (e) {
+                    log(`   Intent Android falhou: ${e.message}`, 'warning');
+                }
+            }
+
+            if (success) {
+                log(`✓ Transmissão iniciada via: ${methods.join(', ')}`, 'success');
+                showToast('Tentando abrir player...');
+            } else {
+                log(`❌ Todos os métodos falharam`, 'error');
+                showToast('Use "Copiar URL" manualmente');
+            }
+        }
+
+        // 2. WEB VIDEO CASTER (MÉTODO CORRIGIDO)
+        function openInWebVideoCaster() {
+            if (!selectedChannel) {
+                showToast('Selecione um canal primeiro');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            log(`📺 Abrindo Web Video Caster: ${selectedChannel.name}`, 'info');
+
+            // MÉTODO CORRIGIDO: wvc-x-callback://open?url=...
+            const wvcUrl = `wvc-x-callback://open?url=${encodeURIComponent(url)}`;
+            
+            log(`   URL Scheme: ${wvcUrl}`, 'info');
+
+            // Tentar múltiplos métodos
+            let success = false;
+
+            // Método 1: window.location
+            try {
+                window.location.href = wvcUrl;
+                log(`   ✓ window.location.href`, 'success');
+                success = true;
+            } catch (e) {
+                log(`   ⚠️ window.location falhou`, 'warning');
+            }
+
+            // Método 2: setTimeout + window.location (fallback)
+            setTimeout(() => {
+                try {
+                    window.location.href = wvcUrl;
+                    log(`   ✓ window.location (timeout)`, 'success');
+                } catch (e) {
+                    log(`   ⚠️ window.location (timeout) falhou`, 'warning');
+                }
+            }, 100);
+
+            // Método 3: window.open (último fallback)
+            setTimeout(() => {
+                try {
+                    window.open(wvcUrl, '_blank');
+                    log(`   ✓ window.open`, 'success');
+                } catch (e) {
+                    log(`   ⚠️ window.open falhou`, 'warning');
+                }
+            }, 300);
+
+            // Método 4: Link web do WVC
+            setTimeout(() => {
+                try {
+                    const webUrl = `https://cast.webvideocaster.com/?url=${encodeURIComponent(url)}`;
+                    window.open(webUrl, '_blank');
+                    log(`   ✓ Web do WVC`, 'success');
+                } catch (e) {
+                    log(`   ⚠️ Web WVC falhou`, 'warning');
+                }
+            }, 500);
+
+            if (success) {
+                showToast('Tentando abrir Web Video Caster...');
+            } else {
+                showToast('Use "Copiar URL" se necessário');
+            }
+        }
+
+        // 3. VLC (MÉTODO UNIVERSAL)
+        function openInVLC() {
+            if (!selectedChannel) {
+                showToast('Selecione um canal primeiro');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            log(`🍊 Abrindo VLC: ${selectedChannel.name}`, 'info');
+
+            // VLC usa vlc:// prefixo
+            const vlcUrl = `vlc://${url}`;
+            log(`   VLC URL: ${vlcUrl}`, 'info');
+
+            let success = false;
+
+            try {
+                window.location.href = vlcUrl;
+                log(`   ✓ window.location.href`, 'success');
+                success = true;
+            } catch (e) {
+                log(`   ⚠️ window.location falhou`, 'warning');
+            }
+
+            setTimeout(() => {
+                try {
+                    window.open(vlcUrl, '_blank');
+                    log(`   ✓ window.open`, 'success');
+                    success = true;
+                } catch (e) {
+                    log(`   ⚠️ window.open falhou`, 'warning');
+                }
+            }, 100);
+
+            if (success) {
+                showToast('Tentando abrir VLC...');
+            }
+        }
+
+        // 4. IPTV SMARTERS (Redireciona para app store)
+        function openInSmarters() {
+            if (!selectedChannel) {
+                showToast('Selecione um canal primeiro');
+                return;
+            }
+
+            log(`🎯 IPTV Smarters: ${selectedChannel.name}`, 'info');
+
+            // Para Android
+            if (platform === 'android') {
+                const androidUrl = 'https://play.google.com/store/apps/details?id=com.smarters.smarterspro';
+                log(`   Redirecionando para Google Play...`, 'info');
+                window.open(androidUrl, '_blank');
+                showToast('Instale IPTV Smarters Pro');
+            }
+            // Para iOS
+            else if (platform === 'ios') {
+                const iosUrl = 'https://apps.apple.com/app/smarters-iptv-pro-player/id6738712575';
+                log(`   Redirecionando para App Store...`, 'info');
+                window.open(iosUrl, '_blank');
+                showToast('Instale IPTV Smarters Pro');
+            }
+            // Para Desktop
+            else {
+                const webUrl = 'https://iptvsmarterspro.com/';
+                log(`   Redirecionando para website...`, 'info');
+                window.open(webUrl, '_blank');
+                showToast('Acesse o site do IPTV Smarters');
+            }
+
+            log(`💡 Dica: Adicione suas credenciais no IPTV Smarters`, 'info');
+        }
+
+        // 5. COPIAR URL
+        function copyUrl() {
+            if (!selectedChannel) {
+                showToast('Selecione um canal primeiro');
+                return;
+            }
+
+            const url = selectedChannel.url;
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(() => {
+                    log('✓ URL copiada', 'success');
+                    showToast('URL copiada!');
+                }).catch(err => {
+                    log(`❌ Erro ao copiar: ${err.message}`, 'error');
+                    copyUrlFallback(url);
+                });
+            } else {
+                copyUrlFallback(url);
+            }
+        }
+
+        function copyUrlFallback(url) {
+            const textarea = document.createElement('textarea');
+            textarea.value = url;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+
+            try {
+                document.execCommand('copy');
+                log('✓ URL copiada (fallback)', 'success');
+                showToast('URL copiada!');
+            } catch (err) {
+                log(`❌ Erro ao copiar (fallback): ${err.message}`, 'error');
+            }
+
+            document.body.removeChild(textarea);
+        }
+    </script>
+</body>
+</html>
