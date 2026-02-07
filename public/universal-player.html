@@ -234,6 +234,9 @@
     <div class="container">
         <div class="header">
             <div class="header-title">📺 IPTV Player</div>
+            <button onclick="window.location.href='/tv.html'" style="background: rgba(255,255,255,0.2); border: none; border-radius: 8px; padding: 8px 16px; color: white; cursor: pointer; font-size: 14px; font-weight: 600; margin-top: 12px;">
+                📺 Parear TV
+            </button>
         </div>
 
         <div class="card">
@@ -244,7 +247,11 @@ Exemplo:
 Servidor: servidor.com:80
 Usuário: usuario
 Senha: senha"></textarea>
-            <button class="button" id="connect-btn" onclick="connect()">🔗 Conectar</button>
+            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                <button class="button" id="connect-btn" onclick="connect()">🔗 Conectar</button>
+                <button class="button" onclick="loadSavedCredentials()" style="background: rgba(255,255,255,0.1); flex: 1;">💾 Salvas</button>
+                <button class="button" onclick="clearCredentials()" style="background: rgba(239,68,68,0.2); flex: 1;">🗑️ Limpar</button>
+            </div>
         </div>
 
         <div id="categories-section" class="card hidden">
@@ -341,6 +348,7 @@ Senha: senha"></textarea>
         let categories = [], allChannels = [], filteredChannels = [];
         let selectedChannel = null;
         let m3uUrl = '';
+        let autoConnect = false;
 
         const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries',
                                'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
@@ -358,6 +366,68 @@ Senha: senha"></textarea>
 
         function show(id) { document.getElementById(id).classList.remove('hidden'); }
         function hide(id) { document.getElementById(id).classList.add('hidden'); }
+
+        // Carregar credenciais dos parâmetros URL (do pareamento)
+        function loadCredentialsFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const hostParam = params.get('host');
+            const userParam = params.get('user');
+            const passParam = params.get('pass');
+
+            if (hostParam && userParam && passParam) {
+                console.log('📥 Credenciais recebidas do pareamento');
+                host = hostParam;
+                username = userParam;
+                password = passParam;
+
+                // Preencher textarea
+                const text = `Servidor: ${host}\nUsuário: ${username}\nSenha: ${password}`;
+                document.getElementById('credentials-input').value = text;
+
+                // Salvar no localStorage
+                saveCredentials();
+
+                // Auto-connect
+                autoConnect = true;
+                console.log('🚀 Auto-conectando...');
+                setTimeout(() => connect(), 500);
+            }
+        }
+
+        // Salvar credenciais no localStorage
+        function saveCredentials() {
+            const credentials = { host, username, password, savedAt: new Date().toISOString() };
+            localStorage.setItem('iptv_saved_credentials', JSON.stringify(credentials));
+            console.log('💾 Credenciais salvas');
+        }
+
+        // Carregar credenciais salvas
+        function loadSavedCredentials() {
+            const saved = localStorage.getItem('iptv_saved_credentials');
+            if (saved) {
+                try {
+                    const credentials = JSON.parse(saved);
+                    const text = `Servidor: ${credentials.host}\nUsuário: ${credentials.username}\nSenha: ${credentials.password}`;
+                    document.getElementById('credentials-input').value = text;
+                    log('💾 Credenciais salvas carregadas');
+                } catch (e) {
+                    console.error('❌ Erro ao carregar salvas:', e);
+                    log('❌ Erro ao carregar credenciais salvas');
+                }
+            } else {
+                log('❌ Nenhuma credencial salva encontrada');
+            }
+        }
+
+        // Limpar credenciais
+        function clearCredentials() {
+            if (confirm('Deseja limpar as credenciais salvas?')) {
+                localStorage.removeItem('iptv_saved_credentials');
+                localStorage.removeItem('iptv_paired_credentials');
+                document.getElementById('credentials-input').value = '';
+                log('🗑️ Credenciais limpas');
+            }
+        }
 
         async function connect() {
             const text = document.getElementById('credentials-input').value;
@@ -393,6 +463,11 @@ Senha: senha"></textarea>
             if (!host || !username || !password) {
                 log('❌ Credenciais inválidas');
                 return;
+            }
+
+            // Salvar credenciais no localStorage (se não for auto-connect)
+            if (!autoConnect) {
+                saveCredentials();
             }
 
             log('🔗 Conectando...');
@@ -670,6 +745,12 @@ Senha: senha"></textarea>
                 log('❌ Erro ao copiar');
             });
         }
+
+        // Inicializar
+        window.addEventListener('load', () => {
+            console.log('🚀 Player universal iniciado');
+            loadCredentialsFromURL();
+        });
     </script>
 </body>
 </html>
