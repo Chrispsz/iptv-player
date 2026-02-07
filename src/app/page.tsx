@@ -82,7 +82,7 @@ export default function Home() {
           <div className="grid md:grid-cols-2 gap-6">
             {/* Pairing Option - Simple */}
             <a
-              href="/tv-simple.html"
+              href="/tv.html"
               className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-2 border-green-500/50 hover:border-green-500 rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
             >
               <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">📺</div>
@@ -99,29 +99,24 @@ export default function Home() {
               )}
             </a>
 
-            {/* Connect Normally - Traditional Method */}
+            {/* Connect Normally */}
             <a
-              href="/tv-normal.html"
+              href="/tv.html"
               className="bg-slate-800/50 border-2 border-slate-700 hover:border-blue-500 rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
             >
-              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">⌨</div>
+              <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">📺</div>
               <h2 className="text-2xl font-bold text-white mb-2">
                 Conectar Direto
               </h2>
               <p className="text-slate-400">
-                Digite suas credenciais na TV (tradicional)
+                Digite suas credenciais IPTV na TV
               </p>
-              {isTV && (
-                <div className="mt-4 text-blue-400 font-medium text-sm">
-                  🎯 Método mais simples
-                </div>
-              )}
             </a>
 
             {/* Player Option */}
             <a
               href="/universal-player.html"
-              className="bg-slate-800/50 border-2 border-slate-700 hover:border-blue-500 rounded-2xl p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
+              className="bg-slate-800/50 border-2 border-slate-700 hover:border-blue-500 rounded-2x2 p-8 transition-all hover:scale-105 hover:shadow-2xl group cursor-pointer"
             >
               <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">▶️</div>
               <h2 className="text-2xl font-bold text-white mb-2">
@@ -132,38 +127,10 @@ export default function Home() {
               </p>
             </a>
           </div>
-
-          {/* TV Instructions */}
-          {isTV && (
-            <div className="bg-blue-500/10 border border-blue-500/30 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-blue-400 mb-4">
-                📱 Como Usar na TV
-              </h3>
-              <ol className="space-y-3 text-slate-300">
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white">1</span>
-                  <span>Instale o aplicativo (botão acima)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white">2</span>
-                  <span>Abra o app e clique em "Parear TV"</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white">3</span>
-                  <span>Escaneie o QR Code com seu celular</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="flex-shrink-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white">4</span>
-                  <span>Pronto! TV conectada sem digitar nada</span>
-                </li>
-              </ol>
-            </div>
-          )}
         </div>
       </main>
-
       <footer className="text-center py-6 text-slate-500 text-sm">
-        <p>IPTV Player - Funciona em TVs, Celulares e Desktop</p>
+        <p>IPTV Player - Pareamento simplificado e funcional</p>
       </footer>
     </div>
   );

@@ -17,12 +17,7 @@ function cleanExpired() {
   }
 }
 
-// Gerar código único de 6 dígitos
-function generateCode(): string {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-}
-
-// Endpoint POST para celular enviar credenciais
+// Endpoint para celular enviar credenciais
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -38,8 +33,8 @@ export async function POST(request: NextRequest) {
     // Limpar expirados
     cleanExpired();
 
-    // Gerar novo código
-    const code = generateCode();
+    // Gerar código único de 6 dígitos
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
 
     // Salvar credenciais
     credentialsStore.set(code, {
@@ -59,13 +54,13 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro ao salvar credenciais:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Internal server error', message: String(error) },
       { status: 500 }
     );
   }
 }
 
-// Endpoint GET para TV consultar credenciais pelo código
+// Endpoint para TV consultar credenciais pelo código
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -107,7 +102,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error('Erro ao consultar credenciais:', error);
-    return NextResponse.json(
+    return NextResponse route.ts
       { error: 'Internal server error' },
       { status: 500 }
     );
