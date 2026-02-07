@@ -455,6 +455,19 @@ Senha: 468612
 
 OU URL M3U Completa:"
                 ></textarea>
+
+                <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); transition: all 0.2s;" onclick="toggleRememberMe()">
+                        <input type="checkbox" id="remember-me" style="width: 20px; height: 20px; accent-color: #60a5fa;">
+                        <span style="font-size: 15px; font-weight: 600;">Manter conectado nesta TV</span>
+                    </label>
+                    <div id="saved-profiles" style="display: none; gap: 8px;">
+                        <button onclick="showProfiles()" style="padding: 8px 16px; background: rgba(96, 165, 250, 0.2); border: none; border-radius: 8px; color: white; cursor: pointer;">
+                            👤 Perfis Salvos
+                        </button>
+                    </div>
+                </div>
+
                 <button id="connect-btn" onclick="connect()">🔗 CONECTAR</button>
             </div>
         </div>
@@ -594,9 +607,105 @@ OU URL M3U Completa:"
         let allChannels = [];
         let selectedChannel = null;
         let platform = 'unknown';
+        let savedCredentials = null;
 
         const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries', 'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
         const BRAZIL_KEYWORDS = ['brasil', 'brazil', 'brasileira', 'brasileiro', 'globo', 'record', 'sbt', 'band', 'rede', 'aberta', 'aberto', 'são paulo', 'rio', 'minas', 'bahia', 'paraná', 'catarinense', 'gaúcha', 'brasília', 'df', 'sp', 'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'pe', 'go', 'es', 'ce', 'am', 'pa', 'rn'];
+
+        const STORAGE_KEY = 'iptv_saved_credentials';
+        const PROFILES_KEY = 'iptv_saved_profiles';
+
+        // Salvar credenciais
+        function saveCredentials(host, username, password, remember) {
+            const credentials = {
+                host,
+                username,
+                password,
+                savedAt: new Date().toISOString(),
+                remember
+            };
+
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials));
+                log('💾 Credenciais salvas localmente', 'success');
+            } catch (e) {
+                log(`❌ Erro ao salvar credenciais: ${e.message}`, 'error');
+            }
+        }
+
+        // Carregar credenciais salvas
+        function loadSavedCredentials() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    savedCredentials = JSON.parse(saved);
+                    log('💾 Credenciais carregadas do armazenamento local', 'info');
+                    return savedCredentials;
+                }
+            } catch (e) {
+                log(`❌ Erro ao carregar credenciais: ${e.message}`, 'error');
+                return null;
+            }
+        }
+
+        // Limpar credenciais salvas
+        function clearSavedCredentials() {
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                savedCredentials = null;
+                document.getElementById('remember-me').checked = false;
+                document.getElementById('credentials-input').value = '';
+                log('🗑️ Credenciais limpas do armazenamento', 'info');
+                showToast('Credenciais limpas');
+            } catch (e) {
+                log(`❌ Erro ao limpar credenciais: ${e.message}`, 'error');
+            }
+        }
+
+        // Toggle "Manter Conectado"
+        function toggleRememberMe() {
+            const checkbox = document.getElementById('remember-me');
+            const profilesDiv = document.getElementById('saved-profiles');
+
+            if (checkbox.checked) {
+                profilesDiv.style.display = 'flex';
+                log('✅ "Manter conectado" ativado', 'info');
+            } else {
+                profilesDiv.style.display = 'none';
+                log('❌ "Manter conectado" desativado', 'info');
+            }
+        }
+
+        // Mostrar modal de perfis salvos
+        function showProfiles() {
+            const saved = loadSavedCredentials();
+            if (!saved || !saved.remember) {
+                showToast('Nenhum perfil salvo com "Manter conectado"');
+                return;
+            }
+
+            const message = `
+                📱 Credenciais Salvas
+
+                Servidor: ${saved.host}
+                Usuário: ${saved.username}
+                Senha: ****${saved.password.slice(-2)}
+                Salvas em: ${new Date(saved.savedAt).toLocaleString('pt-BR')}
+
+                ✅ Estas credenciais serão preenchidas automaticamente na próxima vez!
+                💡 Na TV Android, elas estarão disponíveis.
+
+                ------------------
+
+                Deseja limpar estas credenciais salvas?
+                [Sim] - Elas não serão mais preenchidas
+                [Não] - Cancelar
+            `;
+
+            if (confirm(message)) {
+                clearSavedCredentials();
+            }
+        }
 
         // Detectar plataforma
         function detectPlatform() {
@@ -635,14 +744,47 @@ OU URL M3U Completa:"
 
             document.getElementById('device-icon').textContent = icon;
             document.getElementById('platform-name').textContent = os;
-            document.getElementById('os-badge').textContent = platform === 'android' ? 'Android' : 
-                                                            platform === 'ios' ? 'iOS' : 
+            document.getElementById('os-badge').textContent = platform === 'android' ? 'Android' :
+                                                            platform === 'ios' ? 'iOS' :
                                                             'Desktop';
 
             log(`Plataforma detectada: ${os}`, 'info');
             log(`User Agent: ${userAgent.substring(0, 100)}...`, 'info');
+
+            // Carregar credenciais salvas
+            const saved = loadSavedCredentials();
+            if (saved && saved.remember) {
+                document.getElementById('credentials-input').value = `Servidor: ${saved.host}\nUsuário: ${saved.username}\nSenha: ${saved.password}\n`;
+                document.getElementById('remember-me').checked = true;
+                log('💾 Credenciais salvas carregadas e preenchidas automaticamente', 'info');
+                showSavedProfilesIndicator();
+            }
+
             log('✅ Sistema inicializado. Pronto para conectar.', 'success');
         };
+
+        // Mostrar indicador de credenciais salvas
+        function showSavedProfilesIndicator() {
+            const connectionSection = document.getElementById('connection-section');
+            if (!connectionSection.querySelector('.saved-indicator')) {
+                const indicator = document.createElement('div');
+                indicator.className = 'saved-indicator';
+                indicator.style.cssText = `
+                    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+                    color: white;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    font-size: 13px;
+                    font-weight: 600;
+                    margin-top: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                `;
+                indicator.innerHTML = '💾 Credenciais salvas nesta TV Android';
+                connectionSection.insertBefore(indicator, connectionSection.firstChild.nextSibling);
+            }
+        }
 
         // Funções auxiliares
         function showElement(id) {
@@ -756,6 +898,19 @@ OU URL M3U Completa:"
             host = creds.host;
             username = creds.username;
             password = creds.password;
+
+            // Salvar credenciais se checkbox marcado
+            const rememberMe = document.getElementById('remember-me').checked;
+            if (rememberMe) {
+                saveCredentials(host, username, password, true);
+                showSavedProfilesIndicator();
+            } else {
+                // Limpar credenciais salvas se não marcado
+                const saved = loadSavedCredentials();
+                if (saved) {
+                    clearSavedCredentials();
+                }
+            }
 
             setLoading(true);
             hideElement('categories-section');
