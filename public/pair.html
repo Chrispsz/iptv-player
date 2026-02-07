@@ -299,6 +299,10 @@ Senha: senha"></textarea>
         </div>
     </div>
 
+    <script type="module">
+        import QRCode from 'https://esm.sh/qrcode@1.5.3';
+        window.QRCode = QRCode;
+    </script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         let socket = null;

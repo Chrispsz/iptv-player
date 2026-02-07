@@ -407,7 +407,10 @@ Senha: senha"></textarea>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script type="module">
+        import QRCode from 'https://esm.sh/qrcode@1.5.3';
+        window.QRCode = QRCode;
+    </script>
     <script>
         let host = '', username = '', password = '';
         let categories = [], allChannels = [], filteredChannels = [];
@@ -577,16 +580,19 @@ Senha: senha"></textarea>
                 const catUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_categories`;
                 log(`📂 Carregando categorias...`);
                 const response = await fetch(`https://corsproxy.io/?` + encodeURIComponent(catUrl));
-                categories = await response.json();
+                const responseData = await response.json();
+
+                // Garantir que responseData é um array
+                if (!Array.isArray(responseData)) {
+                    console.error('❌ Resposta inválida:', responseData);
+                    log('❌ Resposta do servidor inválida');
+                    hide('loading');
+                    return;
+                }
+
+                categories = responseData;
 
                 // Filter Brazilian
-                categories = categories.filter(cat => {
-                    const name = cat.category_name.toLowerCase();
-                    return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
-                           !EXCLUDED_CATS.some(ex => name.includes(ex));
-                });
-
-                // Also include important categories
                 categories = categories.filter(cat => {
                     const name = cat.category_name.toLowerCase();
                     return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
@@ -793,10 +799,15 @@ Senha: senha"></textarea>
                 const container = document.getElementById('qr-code');
                 container.innerHTML = '';
 
-                QRCode.toCanvas(container, m3uUrl, {
-                    width: 200,
-                    errorCorrectionLevel: 'H'
-                });
+                if (window.QRCode) {
+                    window.QRCode.toCanvas(container, m3uUrl, {
+                        width: 200,
+                        errorCorrectionLevel: 'H'
+                    });
+                } else {
+                    console.error('❌ QRCode library not loaded');
+                    throw new Error('QRCode not available');
+                }
 
                 document.getElementById('qr-modal').classList.add('active');
                 log('✅ QR Code gerado');
@@ -1017,8 +1028,14 @@ Senha: senha"></textarea>
 
                 const data = await response.json();
 
+                // Garantir que data é um array
+                if (!Array.isArray(data)) {
+                    console.error('❌ Resposta inválida:', data);
+                    return false;
+                }
+
                 // Se recebeu um array válido, a conexão funcionou
-                if (Array.isArray(data) && data.length > 0) {
+                if (data.length > 0) {
                     // Atualizar variáveis globais
                     host = credentials.host;
                     username = credentials.username;

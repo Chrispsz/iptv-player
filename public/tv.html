@@ -320,7 +320,10 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script type="module">
+        import QRCode from 'https://esm.sh/qrcode@1.5.3';
+        window.QRCode = QRCode;
+    </script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         let socket = null;
@@ -520,21 +523,36 @@
             const canvas = document.getElementById('qr-code');
             const canvasContainer = canvas.parentElement;
 
-            QRCode.toCanvas(canvas, url, {
-                width: 256,
-                margin: 0,
-                errorCorrectionLevel: 'H',
-                color: {
-                    dark: '#000000',
-                    light: '#FFFFFF',
-                },
-            }, (error) => {
-                if (error) {
-                    console.error('❌ Erro ao gerar QR:', error);
+            try {
+                if (window.QRCode) {
+                    window.QRCode.toCanvas(canvas, url, {
+                        width: 256,
+                        margin: 0,
+                        errorCorrectionLevel: 'H',
+                        color: {
+                            dark: '#000000',
+                            light: '#FFFFFF',
+                        },
+                    }, (error) => {
+                        if (error) {
+                            console.error('❌ Erro ao gerar QR:', error);
+                        } else {
+                            console.log('✅ QR Code gerado!');
+                        }
+                    });
                 } else {
-                    console.log('✅ QR Code gerado!');
+                    console.error('❌ QRCode não carregado');
+                    throw new Error('QRCode library not loaded');
                 }
-            });
+            } catch (e) {
+                console.error('❌ Erro ao gerar QR Code:', e);
+                // Fallback: mostrar código de sessão como texto
+                const sessionIdElement = document.getElementById('session-code');
+                if (sessionIdElement) {
+                    sessionIdElement.style.color = '#fbbf24';
+                    sessionIdElement.style.fontWeight = '900';
+                }
+            }
         }
 
         // Verificar se já tem credenciais salvas (dispositivo lembrado)
