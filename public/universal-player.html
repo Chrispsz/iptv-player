@@ -579,7 +579,7 @@ Senha: senha"></textarea>
             try {
                 const catUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_categories`;
                 log(`📂 Carregando categorias...`);
-                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(catUrl)}`);
+                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(catUrl)}`);
                 const responseData = await response.json();
 
                 // Garantir que responseData é um array
@@ -639,7 +639,7 @@ Senha: senha"></textarea>
                 const baseUrl = `http://${cleanHost}:${port}`;
                 const url = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_streams&category_id=${catId}`;
 
-                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(url)}`);
+                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(url)}`);
                 allChannels = await response.json();
 
                 // Limit channels
@@ -1020,7 +1020,7 @@ Senha: senha"></textarea>
 
             try {
                 const catUrl = `${baseUrl}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_categories`;
-                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(catUrl)}`);
+                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(catUrl)}`);
 
                 if (!response.ok) {
                     return false;
