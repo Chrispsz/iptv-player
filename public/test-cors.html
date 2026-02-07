@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>IPTV Brasil - Teste com Proxy CORS</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.6.15/dist/hls.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 32px;
+            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
+        }
+        .header-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .info-box {
+            background: rgba(99, 102, 241, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+        .card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 18px;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 15px;
+            font-family: 'Courier New', monospace;
+            font-weight: 500;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.5);
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+        .button {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 20px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
+        }
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .category-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 18px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .category-btn:hover {
+            background: #60a5fa;
+            border-color: #60a5fa;
+            transform: translateX(4px);
+        }
+        .category-btn.active {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            border-color: #60a5fa;
+        }
+        .channel-list {
+            max-height: 500px;
+            overflow-y: auto;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .channel-item {
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .channel-item:hover {
+            background: #2563eb;
+            border-color: #3b82f6;
+            transform: translateX(4px);
+        }
+        .channel-item.active {
+            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+            border-color: #60a5fa;
+        }
+        .player-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.98);
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+        }
+        .player-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 95%;
+            max-width: 1000px;
+            background: #000000;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+        }
+        .player-content video {
+            width: 100%;
+            border-radius: 12px;
+            background: #000000;
+            max-height: 80vh;
+        }
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #ffffff;
+            transition: all 0.2s;
+        }
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        .error {
+            background: #7f1d1d;
+            color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 16px;
+            font-size: 16px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #60a5fa;
+            font-size: 20px;
+        }
+        .spinner {
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-top: 5px solid #60a5fa;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .log-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .log-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 12px;
+            display: flex;
+            gap: 12px;
+        }
+        .log-time {
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 11px;
+            min-width: 80px;
+        }
+        .log-type {
+            color: #60a5fa;
+            font-weight: 600;
+            min-width: 100px;
+        }
+        .status-success {
+            color: #4ade80;
+        }
+        .status-error {
+            color: #f87171;
+        }
+        .status-warning {
+            color: #fbbf24;
+        }
+        .hidden {
+            display: none;
+        }
+        .badge {
+            background: #60a5fa;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-title">📺 IPTV Brasil - Teste com Proxy CORS</div>
+            <div class="subtitle">Contorna bloqueio de rede do servidor</div>
+        </div>
+
+        <!-- Info -->
+        <div class="info-box">
+            <div>🌐 <strong>Problema:</strong> O servidor <code>tv14s.xyz:8080</code> está bloqueando conexões diretas</div>
+            <div style="margin-top: 12px;">✅ <strong>Solução:</strong> Usar proxy CORS público para contornar bloqueio</div>
+            <div style="margin-top: 12px;">🔄 <strong>Método:</strong> <code>allorigins.win</code> → <code>corsproxy.io</code></div>
+        </div>
+
+        <!-- Conexão -->
+        <div id="connection-section">
+            <div class="card">
+                <div class="card-title">📡 Conectar ao Servidor</div>
+                <textarea 
+                    id="credentials-input"
+                    placeholder="Cole suas credenciais aqui...
+
+Exemplo:
+Servidor: tv14s.xyz:8080
+Usuário: KD3zn5
+Senha: 468612
+
+OU URL M3U Completa:"
+                ></textarea>
+                <div class="button-grid">
+                    <button id="connect-btn" onclick="connect()">🔗 CONECTAR</button>
+                    <button onclick="clearLog()" class="btn-secondary">🗑️ Limpar Log</button>
+                </div>
+                <div id="connection-error" class="error hidden"></div>
+            </div>
+        </div>
+
+        <!-- Categorias -->
+        <div id="categories-section" class="hidden">
+            <div class="card">
+                <div class="card-title">📺 Categorias Brasileiras</div>
+                <div id="categories-grid" class="categories-grid"></div>
+            </div>
+        </div>
+
+        <!-- Canais -->
+        <div id="channels-section" class="hidden">
+            <div class="channel-list">
+                <div class="card-title">📺 Canais</div>
+                <div class="card-title" style="font-size: 18px;">Canais: <span id="channel-count">0</span></div>
+                <div class="card-title" style="color: rgba(255,255,255,0.7); font-size: 14px;">
+                    Método: <span id="proxy-method">Aguardando...</span>
+                    <span class="badge">CORS</span>
+                </div>
+                <div id="channel-list-items" class="channel-list"></div>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="loading" class="loading hidden">
+            <div class="spinner"></div>
+            <div>Carregando...</div>
+        </div>
+
+        <!-- Log -->
+        <div class="log-box">
+            <div style="margin-bottom: 12px; color: #60a5fa; font-weight: 700;">📋 Log de Atividade</div>
+            <div id="log-output">Aguardando ações...</div>
+        </div>
+
+        <!-- Player Modal -->
+        <div id="player-modal" class="player-modal">
+            <div class="player-content">
+                <button class="close-btn" onclick="closePlayer()">✕</button>
+                <video 
+                    id="video-player" 
+                    controls 
+                    playsinline 
+                    autoplay
+                    style="width:100%; height:100%;"
+                ></video>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let host = '';
+        let username = '';
+        let password = '';
+        let categories = [];
+        let allChannels = [];
+        let currentChannel = null;
+        let hls = null;
+        let currentProxy = '';
+
+        const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries', 'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
+        const BRAZIL_KEYWORDS = ['brasil', 'brazil', 'brasileira', 'brasileiro', 'globo', 'record', 'sbt', 'band', 'rede', 'aberta', 'aberto', 'são paulo', 'rio', 'minas', 'bahia', 'paraná', 'catarinense', 'gaúcha', 'brasília', 'df', 'sp', 'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'pe', 'go', 'es', 'ce', 'am', 'pa', 'rn'];
+
+        // Funções auxiliares
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function log(message, type = 'info', extra = '') {
+            const logBox = document.getElementById('log-output');
+            const time = new Date().toLocaleTimeString();
+            const icons = {
+                info: 'ℹ️',
+                success: '✅',
+                error: '❌',
+                warning: '⚠️'
+            };
+            const statusClass = `status-${type}`;
+            
+            logBox.innerHTML += `<div class="log-entry">
+                <span class="log-time">[${time}]</span>
+                <span class="log-type status-${type}">${icons[type]}</span>
+                <span>${message}</span>
+                <span class="status-class">${extra}</span>
+            </div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        function showElement(id) {
+            document.getElementById(id).classList.remove('hidden');
+        }
+
+        function hideElement(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function showError(message) {
+            const errorEl = document.getElementById('connection-error');
+            errorEl.textContent = '❌ ' + message;
+            errorEl.classList.remove('hidden');
+            log(message, 'error');
+        }
+
+        function setLoading(loading) {
+            const loadingEl = document.getElementById('loading');
+            if (loading) {
+                loadingEl.classList.remove('hidden');
+            } else {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // CORS Proxy - MULTIPLAS MÉTODOS
+        const PROXY_METHODS = {
+            direct: { name: 'Direto', url: (url) => url },
+            corsproxy: { name: 'CORSProxy.io', url: (url) => 'https://corsproxy.io/?' + encodeURIComponent(url) },
+            allorigins: { name: 'AllOrigins.win', url: (url) => 'https://api.allorigins.win/get?url=' + encodeURIComponent(url) }
+        };
+
+        // Parser de credenciais
+        function parseCredentials(text) {
+            const lines = text.split('\n');
+            let extractedHost = '';
+            let extractedUser = '';
+            let extractedPass = '';
+
+            lines.forEach(line => {
+                const lower = line.toLowerCase().trim();
+                if (lower.includes('servidor:') || lower.includes('*servidor:')) {
+                    const match = line.match(/[:*]\s*([^:\s]+)/);
+                    if (match) extractedHost = match[1].trim();
+                }
+                if (lower.includes('m3u+:')) {
+                    const urlMatch = line.match(/https?:\/\/([^\/]+)/);
+                    if (urlMatch) extractedHost = urlMatch[1].trim();
+                }
+                if (lower.includes('usuário:') || lower.includes('usuario:') || lower.includes('*usuário:') || lower.includes('*usuario:')) {
+                    const match = line.match(/[:*]\s*([^\s]+)/);
+                    if (match) extractedUser = match[1].trim();
+                }
+                if (lower.includes('senha:') || lower.includes('*senha:')) {
+                    const match = line.match(/[:*]\s*([^\s]+)/);
+                    if (match) extractedPass = match[1].trim();
+                }
+            });
+
+            if (!extractedHost || !extractedUser || !extractedPass) {
+                const urlMatch = text.match(/https?:\/\/([^\/]+)\/get\.php\?username=([^&]+)&password=([^&]+)/);
+                if (urlMatch) {
+                    extractedHost = urlMatch[1];
+                    extractedUser = urlMatch[2];
+                    extractedPass = urlMatch[3];
+                }
+            }
+
+            return { host: extractedHost, username: extractedUser, password: extractedPass };
+        }
+
+        // Conectar
+        async function connect() {
+            const text = document.getElementById('credentials-input').value.trim();
+            if (!text) {
+                showError('Por favor, cole suas credenciais');
+                return;
+            }
+
+            const creds = parseCredentials(text);
+            if (!creds.host || !creds.username || !creds.password) {
+                showError('Não foi possível extrair as credenciais');
+                return;
+            }
+
+            host = creds.host;
+            username = creds.username;
+            password = creds.password;
+
+            setLoading(true);
+            hideElement('categories-section');
+            hideElement('channels-section');
+            document.getElementById('connection-error').classList.add('hidden');
+
+            try {
+                const baseUrl = host.startsWith('http') ? host : 'http://' + host;
+
+                // Testar todos os métodos de proxy para buscar categorias
+                for (const [methodName, proxyMethod] of Object.entries(PROXY_METHODS)) {
+                    log(`Testando método para categorias: ${methodName}...`, 'info');
+
+                    try {
+                        const proxyUrl = proxyMethod.url(`${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_categories`);
+                        log(`  → URL: ${proxyUrl.substring(0, 100)}...`, 'info');
+
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            },
+                        });
+
+                        if (response.ok) {
+                            // Para allorigins, precisamos extrair o conteúdo do JSON
+                            let data = await response.json();
+                            if (data.contents) {
+                                data = JSON.parse(data.contents);
+                            }
+
+                            if (Array.isArray(data)) {
+                                log(`✓ Sucesso com método: ${methodName}!`, 'success');
+
+                                categories = data.filter(cat => {
+                                    const name = (cat.category_name || '').toLowerCase();
+                                    const isExcluded = EXCLUDED_CATS.some(e => name.includes(e));
+                                    const isBrazilian = BRAZIL_KEYWORDS.some(kw => name.includes(kw));
+                                    return isBrazilian && !isExcluded;
+                                });
+
+                                if (categories.length === 0) {
+                                    log('Nenhuma categoria brasileira encontrada', 'warning');
+                                    // Continua testando outros métodos
+                                    continue;
+                                }
+
+                                renderCategories();
+                                showElement('categories-section');
+                                log(`✓ ${categories.length} categorias carregadas via: ${methodName}`, 'success');
+                                setLoading(false);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        log(`Falha com método ${methodName}: ${e.message}`, 'warning');
+                    }
+                }
+
+                // Se nenhum método funcionou
+                throw new Error('Todos os métodos de proxy falharam. O servidor pode estar offline ou bloqueando todas as conexões.');
+
+            } catch (err) {
+                showError('Erro ao conectar: ' + (err.message || 'Erro desconhecido'));
+                log('Erro fatal: ' + (err.message || 'Erro desconhecido'), 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Renderizar categorias
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = categories.map(cat => `
+                <button class="category-btn" onclick="loadStreams('${cat.category_id}')">
+                    ${cat.category_name}
+                </button>
+            `).join('');
+        }
+
+        // Carregar canais com proxy
+        async function loadStreams(categoryId) {
+            setLoading(true);
+            hideElement('channels-section');
+
+            const categoryIdSpan = document.getElementById('category-id');
+            if (categoryIdSpan) categoryIdSpan.textContent = categoryId;
+                log(`Carregando canais da categoria ${categoryId}`, 'info');
+
+            try {
+                const baseUrl = host.startsWith('http') ? host : 'http://' + host;
+                
+                // Usar proxy CORS para cada método
+                for (const [methodName, proxyMethod] of Object.entries(PROXY_METHODS)) {
+                    currentProxy = methodName;
+                    
+                    log(`Testando método: ${methodName}...`, 'info');
+                    
+                    try {
+                        const proxyUrl = proxyMethod.url(`${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${categoryId}`);
+                        log(`  → Proxy URL: ${proxyUrl}`, 'info');
+                        
+                        const response = await fetch(proxyUrl, {
+                            method: 'GET',
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                            },
+                        });
+                        
+                        if (response.ok) {
+                            // Para allorigins, precisamos extrair o conteúdo do JSON
+                            let data = await response.json();
+                            if (data.contents) {
+                                try {
+                                    data = JSON.parse(data.contents);
+                                } catch (e) {
+                                    log(`Erro ao parsear allorigins: ${e.message}`, 'warning');
+                                    continue;
+                                }
+                            }
+
+                            if (Array.isArray(data)) {
+                                log(`Sucesso com método: ${methodName}!`, 'success');
+
+                                allChannels = data.map(s => ({
+                                    id: s.stream_id,
+                                    name: s.name,
+                                    url: `${baseUrl}/live/${username}/${password}/${s.stream_id}.m3u8`
+                                }));
+
+                                renderChannels();
+                                showElement('channels-section');
+
+                                // Atualizar método
+                                const proxyMethodSpan = document.getElementById('proxy-method');
+                                proxyMethodSpan.textContent = `${methodName}`;
+
+                                setLoading(false);
+                                return;
+                            }
+                        }
+                    } catch (e) {
+                        log(`Falha com método ${methodName}: ${e.message}`, 'warning');
+                    }
+                }
+                
+                // Se nenhum método funcionou
+                throw new Error('Todos os métodos de proxy falharam. O servidor pode estar offline.');
+                
+            } catch (err) {
+                showError('Erro ao carregar canais: ' + (err.message || 'Erro desconhecido'));
+                log('Erro: ' + (err.message || 'Erro desconhecido'), 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Renderizar canais
+        function renderChannels() {
+            const list = document.getElementById('channel-list-items');
+            const countSpan = document.getElementById('channel-count');
+            
+            if (allChannels.length === 0) {
+                list.innerHTML = '<div style="padding: 24px; text-align: center; color: rgba(255,255,255,0.5);">Nenhum canal encontrado</div>';
+                countSpan.textContent = '0';
+                return;
+            }
+
+            countSpan.textContent = allChannels.length;
+
+            list.innerHTML = allChannels.map(ch => `
+                <div class="channel-item" onclick="playChannel('${ch.id}', '${ch.name}', '${ch.url}')">
+                    <div style="flex: 1; font-weight: 600;">📺</div>
+                    <div style="flex: 2;">
+                        <div style="font-weight: 500;">${ch.name}</div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.7);">ID: ${ch.id}</div>
+                    <div style="font-size: 11px; color: #60a5fa; opacity: 0.8;">Direto</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Tocar canal
+        function playChannel(id, name, url) {
+            currentChannel = { id, name, url };
+
+            log(`📺 Iniciando canal: ${name}`, 'info');
+            log(`🔗 URL direta: ${url}`, 'info');
+
+            // Destacar canal ativo
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Mostrar player
+            const modal = document.getElementById('player-modal');
+            modal.style.display = 'block';
+
+            // Configurar HLS
+            const video = document.getElementById('video-player');
+
+            // Destruir instância anterior
+            if (hls) {
+                try {
+                    hls.destroy();
+                } catch (e) {}
+                hls = null;
+            }
+
+            // Resetar video element
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+
+            log(`🎬 Tentando reprodução...`, 'info');
+
+            // Verificar se suporta HLS.js
+            if (Hls.isSupported()) {
+                log(`✓ HLS.js suportado, usando biblioteca`, 'info');
+
+                try {
+                    hls = new Hls({
+                        debug: false,
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    });
+
+                    hls.loadSource(url);
+                    hls.attachMedia(video);
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        log(`✓ Manifesto carregado com sucesso`, 'success');
+                        video.play().then(() => {
+                            log(`✓ Reprodução iniciada`, 'success');
+                        }).catch(e => {
+                            log(`⚠️ Autoplay bloqueado: ${e.message}`, 'warning');
+                            video.muted = true;
+                            video.play().catch(err => {
+                                log(`❌ Erro ao reproduzir: ${err.message}`, 'error');
+                                showToast(`Erro ao reproduzir: ${err.message}`);
+                            });
+                        });
+                    });
+
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        log(`❌ Erro HLS: ${data.type} - ${data.details}`, 'error');
+                        if (data.fatal) {
+                            log(`⚠️ Erro fatal, tentando método nativo`, 'warning');
+                            hls.destroy();
+                            hls = null;
+
+                            // Fallback para método nativo
+                            log(`🔄 Fallback para método nativo`, 'info');
+                            video.src = url;
+                            video.play().catch(e => {
+                                log(`❌ Erro no método nativo: ${e.message}`, 'error');
+                                showToast(`Erro: ${e.message}`);
+                            });
+                        }
+                    });
+
+                } catch (e) {
+                    log(`❌ Erro ao inicializar HLS.js: ${e.message}`, 'error');
+                    // Fallback para nativo
+                    video.src = url;
+                }
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                log(`✓ HLS nativo suportado (Safari)`, 'info');
+                video.src = url;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play().catch(e => {
+                        log(`❌ Erro ao reproduzir: ${e.message}`, 'error');
+                        showToast(`Erro: ${e.message}`);
+                    });
+                });
+            } else {
+                log(`⚠️ HLS não suportado neste navegador`, 'warning');
+                video.src = url;
+            }
+
+            video.addEventListener('error', (e) => {
+                log(`❌ Erro no elemento de vídeo: ${e.type}`, 'error');
+                const error = video.error;
+                if (error) {
+                    log(`   Código: ${error.code} - ${error.message || 'Sem mensagem'}`, 'error');
+                }
+            });
+        }
+
+        // Fechar player
+        function closePlayer() {
+            const modal = document.getElementById('player-modal');
+            modal.style.display = 'none';
+
+            const video = document.getElementById('video-player');
+            video.pause();
+
+            if (hls) {
+                try {
+                    hls.destroy();
+                } catch (e) {}
+                hls = null;
+            }
+
+            video.removeAttribute('src');
+            video.load();
+
+            // Remover destaque
+            document.querySelectorAll('.channel-item').forEach(item => {
+                item.classList.remove('active');
+            });
+        }
+
+        // Limpar log
+        function clearLog() {
+            const logBox = document.getElementById('log-output');
+            logBox.innerHTML = '';
+        }
+
+        // Toast notification simples
+        function showToast(message) {
+            // Cria toast temporária
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(0,0,0,0.95);
+                color: white;
+                padding: 16px 32px;
+                border-radius: 12px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+                z-index: 10000;
+                font-size: 16px;
+                animation: fadeIn 0.3s ease-out forwards;
+            `;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Iniciar
+        window.onload = function() {
+            log('Sistema inicializado. Conecte para testar.', 'info');
+            const cached = localStorage.getItem('iptv-cache');
+            if (cached) {
+                const cacheData = JSON.parse(cached);
+                if (Date.now() - cacheData.timestamp < 3600000) {
+                    categories = cacheData.categories;
+                    document.getElementById('credentials-input').value = cacheData.credentials;
+                    host = cacheData.host;
+                    username = cacheData.username;
+                    password = cacheData.password;
+                    renderCategories();
+                    showElement('categories-section');
+                }
+            }
+        };
+    </script>
+</body>
+</html>
