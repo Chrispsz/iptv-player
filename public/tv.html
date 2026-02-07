@@ -398,11 +398,13 @@
             updateStatusText('⏳ Conectando ao servidor...', 'connecting');
 
             socket = io('/?XTransformPort=3003', {
-                transports: ['websocket', 'polling'],
+                // Priorizar polling que funciona melhor sem WebSocket
+                transports: ['polling', 'websocket'],
                 reconnection: true,
                 reconnectionDelay: 1000,
-                reconnectionDelayMax: 5000,
+                reconnectionDelayMax: 10000,
                 reconnectionAttempts: Infinity,
+                timeout: 20000,
             });
 
             socket.on('connect', () => {
