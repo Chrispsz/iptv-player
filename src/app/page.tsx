@@ -13,7 +13,9 @@ export default function Home() {
     const tvDetected = /smart.tv|android.tv|googletv|web0s|appletv/.test(ua) ||
                         !/mobile|android|iphone|ipad/.test(ua) &&
                         (screen.width >= 1920 && screen.height >= 1080);
-    setIsTV(tvDetected);
+
+    // Use setTimeout to avoid synchronous setState in effect
+    setTimeout(() => setIsTV(tvDetected), 0);
 
     // Listen for install prompt
     const handler = (e: Event) => {
