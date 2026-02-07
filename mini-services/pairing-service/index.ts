@@ -1,5 +1,11 @@
 import { createServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import { readFileSync } from 'fs';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 // Estado das sessões de pareamento
 interface PairingSession {
@@ -39,10 +45,10 @@ function generateSessionId(): string {
   return result;
 }
 
-// Limpar sessões antigas (mais de 10 minutos)
+// Limpar sessões antigas (mais de 30 minutos)
 function cleanupOldSessions() {
   const now = Date.now();
-  const MAX_AGE = 10 * 60 * 1000; // 10 minutos
+  const MAX_AGE = 30 * 60 * 1000; // 30 minutos (era 10)
 
   sessions.forEach((session, sessionId) => {
     if (now - session.connectedAt > MAX_AGE) {
@@ -95,6 +101,7 @@ io.on('connection', (socket) => {
 
     const session = sessions.get(sessionId);
     if (!session) {
+      console.log(`⚠️ Sessão não encontrada: ${sessionId}, TV precisa gerar nova`);
       callback(null);
       return;
     }
@@ -116,13 +123,14 @@ io.on('connection', (socket) => {
 
     if (!session) {
       console.log(`❌ Sessão não encontrada: ${sessionId}`);
-      callback(false, 'Sessão expirada ou inválida');
+      callback(false, 'Sessão expirada. Gere novo QR Code na TV.');
       return;
     }
 
-    if (session.status === 'completed') {
-      console.log(`⚠️ Sessão já completada: ${sessionId}`);
-      callback(false, 'Esta TV já foi pareada');
+    // Verifica se já tem credenciais (pareamento já realizado)
+    if (session.credentials) {
+      console.log(`⚠️ Sessão já foi pareada: ${sessionId}`);
+      callback(false, 'Esta TV já está configurada. Gere novo QR Code.');
       return;
     }
 
@@ -185,13 +193,15 @@ io.on('connection', (socket) => {
     if (sessionId) {
       console.log(`📴 ${deviceType === 'tv' ? 'TV' : 'Celular'} desconectado da sessão ${sessionId}`);
 
-      // Se era a TV que desconectou, marca a sessão como completada
-      // (não deleta imediatamente para permitir reconexão)
+      // Se foi o celular que desconectou, mantém a sessão aberta para TV
+      // Se foi a TV, só marca como completed se já recebeu credenciais
       if (deviceType === 'tv') {
         const session = sessions.get(sessionId);
-        if (session) {
-          session.status = 'completed';
+        if (session && session.status === 'completed') {
+          // Só deleta se já foi completada (já recebeu credenciais)
+          console.log(`✅ Sessão ${sessionId} completada, pode ser reutilizada`);
         }
+        // Se está pending ou awaiting_credentials, mantém aberta para reconexão
       }
     }
   });
@@ -212,4 +222,21 @@ httpServer.listen(PORT, () => {
   console.log('=================================');
   console.log('✅ Aguardando conexões...');
   console.log('=================================');
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🛑 SIGTERM recebido, encerrando...');
+  httpServer.close(() => {
+    console.log('✅ Servidor encerrado');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('🛑 SIGINT recebido, encerrando...');
+  httpServer.close(() => {
+    console.log('✅ Servidor encerrado');
+    process.exit(0);
+  });
 });

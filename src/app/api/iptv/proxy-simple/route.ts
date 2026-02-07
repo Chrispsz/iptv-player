@@ -41,6 +41,13 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await response.json();
+    console.log(`[Proxy] Response type: ${Array.isArray(data) ? 'array' : typeof data}`);
+    console.log(`[Proxy] Response keys: ${Object.keys(data).join(', ')}`);
+    if (Array.isArray(data)) {
+      console.log(`[Proxy] Array length: ${data.length}`);
+    } else {
+      console.log(`[Proxy] Response sample:`, JSON.stringify(data).substring(0, 200));
+    }
 
     // Return with CORS headers
     return NextResponse.json(data, {

@@ -271,7 +271,7 @@
             </div>
 
             <div class="qr-container">
-                <canvas id="qr-code" width="256" height="256"></canvas>
+                <div id="qr-code"></div>
             </div>
 
             <div class="session-code">
@@ -320,10 +320,7 @@
         </div>
     </div>
 
-    <script type="module">
-        import QRCode from 'https://esm.sh/qrcode@1.5.3';
-        window.QRCode = QRCode;
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         let socket = null;
@@ -385,9 +382,12 @@
         }
 
         // Checkbox para lembrar dispositivo
-        document.getElementById('remember-device').addEventListener('change', (e) => {
-            console.log('📱 Lembrar dispositivo:', e.target.checked);
-        });
+        const rememberCheckbox = document.getElementById('remember-device');
+        if (rememberCheckbox) {
+            rememberCheckbox.addEventListener('change', (e) => {
+                console.log('📱 Lembrar dispositivo:', e.target.checked);
+            });
+        }
 
         // Conectar ao Socket.io
         function connectToServer() {
@@ -433,7 +433,7 @@
                     password: credentials.password,
                     m3uUrl: credentials.m3uUrl,
                     pairedAt: new Date().toISOString(),
-                    rememberDevice: document.getElementById('remember-device').checked,
+                    rememberDevice: rememberCheckbox ? rememberCheckbox.checked : false,
                 };
 
                 localStorage.setItem('iptv_paired_credentials', JSON.stringify(savedCredentials));
@@ -522,28 +522,22 @@
         function generateQRCode(url) {
             console.log('📷 Gerando QR Code...');
 
-            const canvas = document.getElementById('qr-code');
-            const canvasContainer = canvas.parentElement;
+            const qrContainer = document.getElementById('qr-code');
+            qrContainer.innerHTML = ''; // Limpa anterior
 
             try {
-                if (window.QRCode) {
-                    window.QRCode.toCanvas(canvas, url, {
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(qrContainer, {
+                        text: url,
                         width: 256,
-                        margin: 0,
-                        errorCorrectionLevel: 'H',
-                        color: {
-                            dark: '#000000',
-                            light: '#FFFFFF',
-                        },
-                    }, (error) => {
-                        if (error) {
-                            console.error('❌ Erro ao gerar QR:', error);
-                        } else {
-                            console.log('✅ QR Code gerado!');
-                        }
+                        height: 256,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
                     });
+                    console.log('✅ QR Code gerado!');
                 } else {
-                    console.error('❌ QRCode não carregado');
+                    console.error('❌ QRCode library não carregada');
                     throw new Error('QRCode library not loaded');
                 }
             } catch (e) {

@@ -407,10 +407,7 @@ Senha: senha"></textarea>
         </div>
     </div>
 
-    <script type="module">
-        import QRCode from 'https://esm.sh/qrcode@1.5.3';
-        window.QRCode = QRCode;
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         let host = '', username = '', password = '';
         let categories = [], allChannels = [], filteredChannels = [];
@@ -582,35 +579,80 @@ Senha: senha"></textarea>
                 const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(catUrl)}`);
                 const responseData = await response.json();
 
-                // Garantir que responseData é um array
-                if (!Array.isArray(responseData)) {
-                    console.error('❌ Resposta inválida:', responseData);
-                    log('❌ Resposta do servidor inválida');
-                    hide('loading');
+                console.log('📊 Resposta da API:', responseData);
+
+                // Verificar se é array de categorias (resposta normal)
+                if (Array.isArray(responseData)) {
+                    if (responseData.length === 0) {
+                        log('⚠️ Nenhuma categoria encontrada. Verifique suas credenciais.');
+                        hide('loading');
+                        return;
+                    }
+
+                    categories = responseData;
+
+                    // Filter Brazilian
+                    categories = categories.filter(cat => {
+                        const name = cat.category_name.toLowerCase();
+                        return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
+                               !EXCLUDED_CATS.some(ex => name.includes(ex));
+                    });
+
+                    // Limit to top categories
+                    categories = categories.slice(0, 50);
+
+                    if (categories.length === 0) {
+                        // Se não achou brasileiras, mostra todas (pode não ter filtro específico)
+                        categories = responseData.slice(0, 50);
+                        log(`✅ ${categories.length} categorias (todas)`);
+                        renderCategories();
+                        show('categories-section');
+
+                        // Save M3U URL for QR
+                        m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
+                        log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
+                        return;
+                    }
+
+                    log(`✅ ${categories.length} categorias brasileiras`);
+                    renderCategories();
+                    show('categories-section');
+
+                    // Save M3U URL for QR
+                    m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
+                    log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
+
                     return;
                 }
 
-                categories = responseData;
+                // Se não é array, verificar se é resposta de autenticação (user_info/server_info)
+                if (responseData.user_info && responseData.user_info.status) {
+                    const status = responseData.user_info.status.toLowerCase();
+                    if (status === 'active' || status === 'enabled') {
+                        // Credenciais VÁLIDAS mas servidor não retornou categorias
+                        // Isso pode significar que não há categorias ou o formato é diferente
+                        console.log('✅ Credenciais VÁLIDAS! Status:', status);
+                        console.log('⚠️ Servidor não retornou array de categorias');
+                        log(`✅ Credenciais VÁLIDAS (${responseData.user_info.username})`);
+                        log('⚠️ Servidor não retornou categorias. Tente usar M3U direto.');
+                        hide('loading');
+                        return;
+                    } else {
+                        // Credenciais inválidas ou expiradas
+                        console.error('❌ Credenciais inválidas:', status);
+                        log(`❌ Credenciais inválidas (${status}). Verifique servidor/usuário/senha.`);
+                        hide('loading');
+                        return;
+                    }
+                }
 
-                // Filter Brazilian
-                categories = categories.filter(cat => {
-                    const name = cat.category_name.toLowerCase();
-                    return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
-                           !EXCLUDED_CATS.some(ex => name.includes(ex));
-                });
-
-                // Limit to top categories
-                categories = categories.slice(0, 50);
-
-                log(`✅ ${categories.length} categorias`);
-                renderCategories();
-                show('categories-section');
-
-                // Save M3U URL for QR
-                m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
-                log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
+                // Resposta desconhecida
+                console.error('❌ Resposta desconhecida:', responseData);
+                log('❌ Resposta do servidor inválida. Tente novamente.');
+                hide('loading');
 
             } catch (e) {
+                console.error('❌ Erro ao carregar categorias:', e);
                 log(`❌ Erro: ${e.message}`);
             } finally {
                 hide('loading');
@@ -640,11 +682,29 @@ Senha: senha"></textarea>
                 const url = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_streams&category_id=${catId}`;
 
                 const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(url)}`);
-                allChannels = await response.json();
+                const responseData = await response.json();
+
+                console.log('📊 Resposta canais:', responseData);
+
+                // Verificar se é array de canais (resposta normal)
+                if (!Array.isArray(responseData)) {
+                    console.error('❌ Resposta inválida (esperava array):', responseData);
+                    log('❌ Resposta do servidor inválida');
+                    hide('loading');
+                    return;
+                }
+
+                allChannels = responseData;
 
                 // Limit channels
                 allChannels = allChannels.slice(0, 200);
                 filteredChannels = [...allChannels];
+
+                if (allChannels.length === 0) {
+                    log('⚠️ Nenhum canal nesta categoria');
+                    hide('loading');
+                    return;
+                }
 
                 log(`✅ ${allChannels.length} canais`);
                 document.getElementById('channel-count').textContent = allChannels.length;
@@ -799,10 +859,14 @@ Senha: senha"></textarea>
                 const container = document.getElementById('qr-code');
                 container.innerHTML = '';
 
-                if (window.QRCode) {
-                    window.QRCode.toCanvas(container, m3uUrl, {
+                if (typeof QRCode !== 'undefined') {
+                    new QRCode(container, {
+                        text: m3uUrl,
                         width: 200,
-                        errorCorrectionLevel: 'H'
+                        height: 200,
+                        colorDark: "#000000",
+                        colorLight: "#ffffff",
+                        correctLevel: QRCode.CorrectLevel.M
                     });
                 } else {
                     console.error('❌ QRCode library not loaded');

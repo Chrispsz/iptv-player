@@ -299,10 +299,7 @@ Senha: senha"></textarea>
         </div>
     </div>
 
-    <script type="module">
-        import QRCode from 'https://esm.sh/qrcode@1.5.3';
-        window.QRCode = QRCode;
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
     <script>
         let socket = null;
@@ -420,9 +417,21 @@ Senha: senha"></textarea>
                 console.log('✅ Conectado ao servidor');
                 updateConnectionStatus(true);
                 hide('connecting-state');
-                show('form-state');
-                // Carregar credenciais salvas automaticamente
-                loadSavedCredentials();
+
+                // Conectar à sessão específica
+                console.log('🔗 Entrando na sessão:', sessionId);
+                socket.emit('mobile:pair:connect', sessionId, (success, message) => {
+                    if (success) {
+                        console.log('✅ Conectado à sessão');
+                        show('form-state');
+                        // Carregar credenciais salvas automaticamente
+                        loadSavedCredentials();
+                    } else {
+                        console.error('❌ Erro ao conectar à sessão:', message);
+                        showStatus('error', `❌ ${message}`);
+                        hide('connecting-state');
+                    }
+                });
             });
 
             socket.on('connect_error', (err) => {
@@ -439,6 +448,11 @@ Senha: senha"></textarea>
 
             socket.on('session:mobile_connected_ack', () => {
                 console.log('📱 TV reconheceu conexão do celular');
+            });
+
+            socket.on('session:mobile_connected', () => {
+                console.log('📱 TV reconheceu que celular se conectou');
+                showStatus('success', '✅ TV conectada! Aguardando credenciais...');
             });
         }
 
