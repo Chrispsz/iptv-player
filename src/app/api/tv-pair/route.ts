@@ -22,7 +22,7 @@ function generateCode(): string {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-// Endpoint para celular enviar credenciais
+// Endpoint POST para celular enviar credenciais
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Endpoint para TV consultar credenciais pelo código
+// Endpoint GET para TV consultar credenciais pelo código
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
