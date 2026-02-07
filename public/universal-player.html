@@ -3,330 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IPTV Brasil - Transmissão Universal</title>
+    <title>IPTV Player</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            color: #ffffff;
+            background: #0f172a;
+            color: #fff;
             min-height: 100vh;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .header {
             background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
-            padding: 24px;
-            border-radius: 16px;
-            margin-bottom: 32px;
-            box-shadow: 0 8px 32px rgba(124, 58, 237, 0.3);
-        }
-        .header-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .subtitle {
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .device-info {
-            background: rgba(34, 197, 94, 0.15);
-            border: 2px solid #22c55e;
+            padding: 20px;
             border-radius: 12px;
-            padding: 16px 20px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            margin-bottom: 20px;
         }
-        .device-icon {
-            font-size: 32px;
-        }
-        .device-text {
-            font-size: 16px;
-        }
-        .device-badge {
-            background: #22c55e;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: auto;
-        }
+        .header-title { font-size: 24px; font-weight: 700; }
         .card {
             background: #1e293b;
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .card-title {
-            font-size: 22px;
-            font-weight: 700;
+            border-radius: 12px;
+            padding: 20px;
             margin-bottom: 16px;
-            color: #60a5fa;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
         textarea {
             width: 100%;
-            min-height: 140px;
-            padding: 18px;
+            min-height: 120px;
+            padding: 16px;
             border: 2px solid #334155;
-            border-radius: 12px;
+            border-radius: 10px;
             background: #0f172a;
-            color: #ffffff;
-            font-size: 15px;
-            font-family: 'Courier New', monospace;
-            font-weight: 500;
+            color: #fff;
+            font-size: 14px;
+            font-family: monospace;
         }
-        textarea:focus {
-            outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.5);
-        }
+        textarea:focus { outline: none; border-color: #60a5fa; }
         .button {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            color: #ffffff;
+            background: #3b82f6;
+            color: #fff;
             border: none;
-            border-radius: 12px;
-            padding: 20px 32px;
+            border-radius: 10px;
+            padding: 16px 24px;
             font-size: 16px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             width: 100%;
+            margin-top: 12px;
         }
-        .button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(96, 165, 250, 0.4);
-        }
-        .button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .button:hover { background: #2563eb; }
+        .button:disabled { opacity: 0.5; cursor: not-allowed; }
         .categories-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
         }
         .category-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 18px;
-            font-size: 15px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 14px;
+            font-size: 14px;
             cursor: pointer;
-            transition: all 0.2s;
         }
-        .category-btn:hover {
-            background: #60a5fa;
-            border-color: #60a5fa;
-            transform: translateX(4px);
-        }
+        .category-btn:hover { background: #3b82f6; }
         .channel-list {
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
             background: #1e293b;
-            border-radius: 16px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px;
         }
         .channel-item {
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
             background: #0f172a;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255,255,255,0.2);
             cursor: pointer;
-            transition: all 0.2s;
+            font-size: 14px;
         }
-        .channel-item:hover {
-            background: #2563eb;
+        .channel-item:hover, .channel-item.selected {
+            background: #3b82f6;
             border-color: #3b82f6;
-            transform: translateX(4px);
-        }
-        .channel-item.selected {
-            background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
-            border-color: #60a5fa;
         }
         .selected-channel {
             background: #1e293b;
-            border-radius: 16px;
-            padding: 24px;
-            margin-top: 20px;
-            border: 2px solid #60a5fa;
-        }
-        .selected-channel-name {
-            font-size: 28px;
-            font-weight: 700;
-            margin-bottom: 16px;
-        }
-        .url-display {
-            background: #0f172a;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            word-break: break-all;
-            margin-bottom: 20px;
-            color: #60a5fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 16px;
+            border: 2px solid #3b82f6;
         }
         .players-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
         }
-        .player-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
+        .player-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 16px;
+            color: #fff;
             cursor: pointer;
-            transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
         }
-        .player-card:hover {
-            border-color: #60a5fa;
-            background: rgba(96, 165, 250, 0.1);
-            transform: translateY(-4px);
-        }
-        .player-card.universal {
-            border-color: #22c55e;
-            background: rgba(34, 197, 94, 0.1);
-        }
-        .player-card.universal:hover {
-            border-color: #22c55e;
+        .player-btn:hover { background: rgba(255,255,255,0.2); }
+        .player-btn.universal {
             background: rgba(34, 197, 94, 0.2);
-            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+            border-color: #22c55e;
         }
-        .player-icon {
-            font-size: 36px;
-            margin-bottom: 12px;
-        }
-        .player-name {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-        .player-description {
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.6);
-        }
-        .universal-badge {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
-            display: inline-block;
-            margin-bottom: 8px;
-        }
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #60a5fa;
-            font-size: 20px;
-        }
+        .player-btn.universal:hover { background: rgba(34, 197, 94, 0.3); }
+        .hidden { display: none !important; }
+        .loading { text-align: center; padding: 20px; color: #3b82f6; }
         .spinner {
-            border: 5px solid rgba(255, 255, 255, 0.2);
-            border-top: 5px solid #60a5fa;
+            border: 4px solid rgba(255,255,255,0.2);
+            border-top: 4px solid #3b82f6;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 12px;
         }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
         .log-box {
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 20px;
-            max-height: 400px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 10px;
+            padding: 12px;
+            margin-top: 16px;
+            max-height: 200px;
             overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            line-height: 1.5;
+            font-family: monospace;
+            font-size: 12px;
         }
         .log-entry {
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            font-size: 12px;
-            display: flex;
-            gap: 12px;
-        }
-        .log-time {
-            color: rgba(255, 255, 255, 0.4);
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 11px;
-            min-width: 80px;
-        }
-        .log-type {
-            color: #60a5fa;
-            font-weight: 600;
-            min-width: 100px;
-        }
-        .status-success {
-            color: #4ade80;
-        }
-        .status-error {
-            color: #f87171;
-        }
-        .status-warning {
-            color: #fbbf24;
-        }
-        .hidden {
-            display: none;
-        }
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-top: 16px;
-        }
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        .toast {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.95);
-            color: white;
-            padding: 16px 32px;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            z-index: 10000;
-            font-size: 16px;
-            animation: slideDown 0.3s ease-out;
-        }
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
         }
         .modal-overlay {
             position: fixed;
@@ -334,1346 +153,522 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0,0,0,0.9);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
-            backdrop-filter: blur(8px);
+            z-index: 1000;
         }
-        .modal-overlay.active {
-            display: flex;
-        }
+        .modal-overlay.active { display: flex; }
         .modal-content {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 20px;
-            padding: 32px;
-            max-width: 500px;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
             width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            max-height: 90vh;
+            overflow-y: auto;
         }
         .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
+            margin-bottom: 16px;
         }
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        .modal-title { font-size: 20px; font-weight: 700; }
         .modal-close {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255,255,255,0.1);
             border: none;
             border-radius: 50%;
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
-            font-size: 24px;
+            font-size: 18px;
             color: white;
-            transition: all 0.2s;
-        }
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: scale(1.1);
         }
         .qr-container {
             text-align: center;
-            padding: 24px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 16px;
-            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            margin-bottom: 16px;
         }
         .qr-code {
             background: white;
-            padding: 16px;
-            border-radius: 12px;
+            padding: 12px;
+            border-radius: 10px;
             display: inline-block;
         }
         .qr-instructions {
             text-align: center;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-            line-height: 1.6;
+            font-size: 13px;
+            line-height: 1.5;
+            color: rgba(255,255,255,0.7);
         }
         .qr-instructions h3 {
             color: #f59e0b;
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 12px;
         }
-        .qr-instructions p {
-            margin-bottom: 12px;
-        }
-        .step-number {
-            display: inline-block;
-            background: #f59e0b;
+        .qr-btn {
+            background: #22c55e;
             color: white;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 28px;
-            font-weight: 700;
-            margin-right: 8px;
-        }
-        /* Estilos para Perfis Salvos */
-        .profile-card {
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .profile-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-            border-color: #60a5fa;
-            transform: translateX(4px);
-            box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
-        }
-        .profile-card.selected {
-            background: rgba(34, 197, 94, 0.15);
-            border-color: #22c55e;
-            box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-        }
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .profile-name {
-            font-size: 18px;
-            font-weight: 700;
-            color: #fbbf24;
-            margin-bottom: 4px;
-        }
-        .profile-server {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 4px;
-        }
-        .profile-user {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 4px;
-        }
-        .profile-actions {
-            display: flex;
-            gap: 8px;
-        }
-        .profile-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            padding: 6px 12px;
-            color: white;
-            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
             font-size: 13px;
-            transition: all 0.2s;
-        }
-        .profile-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        .profile-btn.danger {
-            background: rgba(239, 68, 68, 0.2);
-            border-color: #ef4444;
-        }
-        .profile-btn.danger:hover {
-            background: rgba(239, 68, 68, 0.3);
-        }
-        .profile-status {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            text-align: center;
-            font-size: 10px;
-            margin-left: auto;
-        }
-        .status-unknown {
-            background: rgba(156, 163, 175, 0.3);
-        color: white;
-        }
-        .status-validating {
-            background: rgba(251, 191, 36, 0.3);
-            color: white;
-            animation: pulse 2s infinite;
-        }
-        .status-valid {
-            background: rgba(34, 197, 94, 0.3);
-            color: white;
-        }
-        .status-invalid {
-            background: rgba(239, 68, 68, 0.3);
-            color: white;
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        /* Indicadores de validação em tempo real */
-        .profiles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 48px;
-            color: rgba(255, 255, 255, 0.5);
-        }
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-        }
-        .empty-state-text {
-            font-size: 18px;
-            margin-bottom: 16px;
-        }
-        /* Modal de Edição de Perfil */
-        .edit-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10001;
-            backdrop-filter: blur(8px);
-        }
-        .edit-modal.active {
-            display: flex;
-        }
-        .modal-content {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border-radius: 20px;
-            padding: 32px;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .modal-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: white;
-        }
-        .modal-close {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            cursor: pointer;
-            font-size: 24px;
-            color: white;
-            transition: all 0.2s;
-        }
-        .modal-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(1.1);
-        }
-        .modal-body {
-            color: rgba(255, 255, 255, 0.9);
-        }
-        .modal-input {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            font-size: 15px;
-            margin-bottom: 16px;
-        }
-        .modal-input:focus {
-            outline: none;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.3);
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 12px;
-            justify-content: flex-end;
-            margin-top: 24px;
-        }
-        .modal-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            width: 100%;
+            margin-top: 8px;
         }
-        .modal-btn.primary {
-            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-            color: white;
+        .qr-btn:hover { background: #16a34a; }
+        .qr-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            margin-top: 12px;
         }
-        .modal-btn.primary:hover {
-            background: linear-gradient(135deg, #16a34a 100%, #15803d 100%);
-            transform: translateY(-2px);
-        }
-        .modal-btn.secondary {
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-        .modal-btn.secondary:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
+        .qr-btn.secondary:hover { background: rgba(255,255,255,0.2); }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
-            <div class="header-title">📺 IPTV Brasil - Transmissão Universal</div>
-            <div class="subtitle">Abre em múltiplos players automaticamente</div>
+            <div class="header-title">📺 IPTV Player</div>
         </div>
 
-        <!-- Info de Dispositivo -->
-        <div class="device-info">
-            <div class="device-icon" id="device-icon">📱</div>
-            <div class="device-text">
-                <strong>Plataforma:</strong> <span id="platform-name">Detectando...</span>
-            </div>
-            <div class="device-badge" id="os-badge">Android</div>
-        </div>
-
-        <!-- Conexão -->
-        <div id="connection-section">
-            <div class="card">
-                <div class="card-title">📡 Conectar ao Servidor</div>
-                <textarea
-                    id="credentials-input"
-                    placeholder="Cole suas credenciais aqui...
+        <div class="card">
+            <div style="margin-bottom: 12px; font-weight: 600;">Credenciais:</div>
+            <textarea id="credentials-input" placeholder="Cole suas credenciais...
 
 Exemplo:
-Servidor: tv14s.xyz:8080
-Usuário: KD3zn5
-Senha: 468612
-
-OU URL M3U Completa:"
-                ></textarea>
-
-                <div style="display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 16px; background: rgba(255,255,255,0.05); border-radius: 12px; border: 2px solid rgba(255,255,255,0.1); transition: all 0.2s;" onclick="toggleRememberMe()">
-                        <input type="checkbox" id="remember-me" style="width: 20px; height: 20px; accent-color: #60a5fa;">
-                        <span style="font-size: 15px; font-weight: 600;">Manter conectado nesta TV</span>
-                    </label>
-                    <div id="saved-profiles" style="display: none; gap: 8px;">
-                        <button onclick="showProfiles()" style="padding: 8px 16px; background: rgba(96, 165, 250, 0.2); border: none; border-radius: 8px; color: white; cursor: pointer;">
-                            👤 Perfis Salvos
-                        </button>
-                    </div>
-                </div>
-
-                <button id="connect-btn" onclick="connect()">🔗 CONECTAR</button>
-            </div>
+Servidor: servidor.com:80
+Usuário: usuario
+Senha: senha"></textarea>
+            <button class="button" id="connect-btn" onclick="connect()">🔗 Conectar</button>
         </div>
 
-        <!-- Categorias -->
-        <div id="categories-section" class="hidden">
-            <div class="card">
-                <div class="card-title">📺 Categorias Brasileiras</div>
-                <div id="categories-grid" class="categories-grid"></div>
-            </div>
+        <div id="categories-section" class="card hidden">
+            <div style="margin-bottom: 12px; font-weight: 600;">Categorias:</div>
+            <div id="categories-grid" class="categories-grid"></div>
         </div>
 
-        <!-- Canais -->
-        <div id="channels-section" class="hidden">
-            <div class="card">
-                <div class="card-title">📺 Canais</div>
-                <div style="margin-bottom: 16px; color: rgba(255,255,255,0.7);">
-                    Selecione um canal para transmitir
-                </div>
-                <div id="channel-list-items" class="channel-list"></div>
+        <div id="channels-section" class="card hidden">
+            <div style="margin-bottom: 12px; font-weight: 600;">
+                Canais: <span id="channel-count">0</span>
             </div>
+            <input type="text" id="search-input" placeholder="Buscar canal..."
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #334155;
+                          background: #0f172a; color: #fff; margin-bottom: 12px;"
+                   oninput="filterChannels()">
+            <div id="channel-list" class="channel-list"></div>
         </div>
 
-        <!-- Canal Selecionado -->
         <div id="selected-channel" class="selected-channel hidden">
-            <div class="selected-channel-name" id="channel-name">Canal Selecionado</div>
-            <div style="margin-bottom: 12px; font-weight: 600;">URL do Stream:</div>
-            <div class="url-display" id="stream-url">...</div>
+            <div style="font-size: 20px; font-weight: 700; margin-bottom: 12px;" id="channel-name">Canal Selecionado</div>
+            <div style="font-size: 12px; word-break: break-all; background: #0f172a; padding: 10px;
+                 border-radius: 8px; margin-bottom: 12px; color: #60a5fa;" id="stream-url"></div>
 
-            <div class="card-title" style="font-size: 18px; margin-bottom: 20px;">🎮 Abrir em Player:</div>
-
-            <!-- Botão QR Code para Android TV -->
-            <div class="player-card universal" onclick="generateQRCode()" style="border-color: #f59e0b; background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(30, 41, 59, 1) 100%);">
-                <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block; margin-bottom: 16px;">
-                    📱 ANDROID TV
-                </div>
-                <div class="player-icon">📷</div>
-                <div class="player-name">QR Code para TV</div>
-                <div class="player-description">
-                    Escaneie na Smart TV/Android Box e canais carregam automaticamente!
-                </div>
-            </div>
-
+            <div style="font-weight: 600; margin-bottom: 12px;">Abrir no Player:</div>
             <div class="players-grid">
-                <!-- Botão Universal -->
-                <div class="player-card universal" onclick="universalCast()">
-                    <div class="universal-badge">🚀 UNIVERSAL</div>
-                    <div class="player-icon">📡</div>
-                    <div class="player-name">Transmissão Universal</div>
-                    <div class="player-description">Tenta todos os métodos automaticamente</div>
-                </div>
-
-                <!-- Web Video Caster -->
-                <div class="player-card" onclick="openInWebVideoCaster()">
-                    <div class="player-icon">📺</div>
-                    <div class="player-name">Web Video Caster</div>
-                    <div class="player-description">Smart TV / Chromecast</div>
-                </div>
-
-                <!-- VLC -->
-                <div class="player-card" onclick="openInVLC()">
-                    <div class="player-icon">🍊</div>
-                    <div class="player-name">VLC</div>
-                    <div class="player-description">Android/iOS/Windows/Mac</div>
-                </div>
-
-                <!-- IPTV Smarters -->
-                <div class="player-card" onclick="openInSmarters()">
-                    <div class="player-icon">🎯</div>
-                    <div class="player-name">IPTV Smarters</div>
-                    <div class="player-description">Android/iOS/TV Box</div>
-                </div>
-
-                <!-- Copiar URL -->
-                <div class="player-card" onclick="copyUrl()">
-                    <div class="player-icon">📋</div>
-                    <div class="player-name">Copiar URL</div>
-                    <div class="player-description">Colar manualmente</div>
-                </div>
+                <button class="player-btn universal" onclick="openUniversal()">
+                    🚀 Universal<br><small style="font-weight:400; opacity:0.7">Auto-detecta</small>
+                </button>
+                <button class="player-btn" onclick="openInVLC()">
+                    🍊 VLC<br><small style="font-weight:400; opacity:0.7">Android/iOS/Desktop</small>
+                </button>
+                <button class="player-btn" onclick="openInJustPlayer()">
+                    📱 JustPlayer<br><small style="font-weight:400; opacity:0.7">Android TV</small>
+                </button>
+                <button class="player-btn" onclick="copyUrl()">
+                    📋 Copiar URL<br><small style="font-weight:400; opacity:0.7">Cole no player</small>
+                </button>
             </div>
         </div>
 
-        <!-- Loading -->
         <div id="loading" class="loading hidden">
             <div class="spinner"></div>
             <div>Carregando...</div>
         </div>
 
-        <!-- Modal QR Code -->
-        <div id="qr-modal" class="modal-overlay">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <div class="modal-title">
-                        📷 QR Code para TV Android
-                    </div>
-                    <button class="modal-close" onclick="closeQRModal()">✕</button>
-                </div>
-
-                <div class="qr-container">
-                    <div id="qr-code" class="qr-code"></div>
-                </div>
-
-                <div class="qr-instructions">
-                    <h3>📱 Como usar na Smart TV/Android Box:</h3>
-                    <p>
-                        <span class="step-number">1</span>
-                        Abra o app de leitor de QR Code na sua TV (GSE Smart IPTV, Lazy IPTV, etc.)
-                    </p>
-                    <p>
-                        <span class="step-number">2</span>
-                        Escaneie este QR Code
-                    </p>
-                    <p>
-                        <span class="step-number">3</span>
-                        Os canais serão carregados automaticamente!
-                    </p>
-                    <p style="margin-top: 16px; font-size: 12px; color: rgba(255,255,255,0.5);">
-                        💡 Dica: Se o QR não funcionar, use os outros métodos abaixo
-                    </p>
-                </div>
-            </div>
+        <div class="card">
+            <button class="button" style="background: rgba(255,255,255,0.1);" onclick="generateQRCode()">
+                📺 QR Code para TV
+            </button>
         </div>
 
-        <!-- Log -->
         <div class="log-box">
-            <div style="margin-bottom: 12px; color: #60a5fa; font-weight: 700;">📋 Log de Atividade</div>
-            <div id="log-output">Aguardando ações...</div>
+            <div style="margin-bottom: 8px; color: #60a5fa; font-weight: 700;">Log</div>
+            <div id="log-output">Pronto.</div>
         </div>
     </div>
 
+    <!-- Modal QR Code -->
+    <div id="qr-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">📺 QR Code para TV</div>
+                <button class="modal-close" onclick="closeQRModal()">✕</button>
+            </div>
+
+            <div class="qr-container">
+                <div id="qr-code" class="qr-code"></div>
+            </div>
+
+            <div class="qr-instructions">
+                <h3>Opções para TV Android:</h3>
+                <p>Escaneie o QR Code ou clique abaixo:</p>
+
+                <button class="qr-btn" onclick="openM3UURL()">
+                    📺 Abrir M3U no JustPlayer
+                </button>
+                <button class="qr-btn secondary" onclick="openVLCIntent()">
+                    🍊 Abrir no VLC TV
+                </button>
+                <button class="qr-btn secondary" onclick="copyM3UUrl()">
+                    📋 Copiar URL M3U
+                </button>
+
+                <p style="margin-top: 16px; font-size: 11px; opacity: 0.6;">
+                    Escaneie ou use um app de leitor QR na TV
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <script>
-        // Estado global
-        let host = '';
-        let username = '';
-        let password = '';
-        let categories = [];
-        let allChannels = [];
+        let host = '', username = '', password = '';
+        let categories = [], allChannels = [], filteredChannels = [];
         let selectedChannel = null;
-        let platform = 'unknown';
-        let savedCredentials = null;
+        let m3uUrl = '';
 
-        const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries', 'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
-        const BRAZIL_KEYWORDS = ['brasil', 'brazil', 'brasileira', 'brasileiro', 'globo', 'record', 'sbt', 'band', 'rede', 'aberta', 'aberto', 'são paulo', 'rio', 'minas', 'bahia', 'paraná', 'catarinense', 'gaúcha', 'brasília', 'df', 'sp', 'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'pe', 'go', 'es', 'ce', 'am', 'pa', 'rn'];
+        const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries',
+                               'radio', 'rádio', 'music', 'musica', 'audio', 'som', 'adult', 'xxx', 'porn'];
+        const BRAZIL_KEYWORDS = ['brasil', 'brazil', 'brasileira', 'brasileiro', 'globo', 'record',
+                               'sbt', 'band', 'rede', 'aberta', 'aberto', 'são paulo', 'rio', 'minas',
+                               'bahia', 'paraná', 'catarinense', 'gaúcha', 'brasília', 'df', 'sp',
+                               'rj', 'mg', 'rs', 'pr', 'sc', 'ba', 'pe', 'go', 'es', 'ce', 'am', 'pa', 'rn'];
 
-        const STORAGE_KEY = 'iptv_saved_credentials';
-        const PROFILES_KEY = 'iptv_saved_profiles';
-
-        // Salvar credenciais
-        function saveCredentials(host, username, password, remember) {
-            const credentials = {
-                host,
-                username,
-                password,
-                savedAt: new Date().toISOString(),
-                remember
-            };
-
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(credentials));
-                log('💾 Credenciais salvas localmente', 'success');
-            } catch (e) {
-                log(`❌ Erro ao salvar credenciais: ${e.message}`, 'error');
-            }
-        }
-
-        // Gerenciar múltiplos perfis
-        let profiles = [];
-        let editingProfileId = null;
-
-        function loadProfiles() {
-            try {
-                const saved = localStorage.getItem(PROFILES_KEY);
-                if (saved) {
-                    profiles = JSON.parse(saved);
-                    log(`📱 ${profiles.length} perfis carregados`, 'info');
-                }
-            } catch (e) {
-                log(`❌ Erro ao carregar perfis: ${e.message}`, 'error');
-            }
-        }
-
-        function saveProfile(profile) {
-            try {
-                // Verificar se já existe perfil com mesmo servidor/usuário
-                const existingIndex = profiles.findIndex(p => 
-                    p.host === profile.host && p.username === profile.username
-                );
-
-                if (existingIndex >= 0) {
-                    // Atualizar perfil existente
-                    profiles[existingIndex] = {
-                        ...profiles[existingIndex],
-                        ...profile,
-                        updatedAt: new Date().toISOString()
-                    };
-                    log('🔄 Perfil atualizado', 'info');
-                } else {
-                    // Adicionar novo perfil
-                    profiles.push({
-                        ...profile,
-                        id: Date.now().toString(),
-                        createdAt: new Date().toISOString(),
-                        status: 'validating',
-                        lastValidated: null
-                    });
-                    log('➕ Novo perfil adicionado', 'info');
-                }
-
-                localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
-                log('💾 Perfis salvos', 'success');
-                renderProfiles();
-            } catch (e) {
-                log(`❌ Erro ao salvar perfil: ${e.message}`, 'error');
-            }
-        }
-
-        function deleteProfile(profileId) {
-            try {
-                profiles = profiles.filter(p => p.id !== profileId);
-                localStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
-                log('🗑️ Perfil deletado', 'info');
-                renderProfiles();
-            } catch (e) {
-                log(`❌ Erro ao deletar perfil: ${e.message}`, 'error');
-            }
-        }
-
-        function selectProfile(profileId) {
-            const profile = profiles.find(p => p.id === profileId);
-            if (profile) {
-                log(`📱 Perfil selecionado: ${profile.name || 'Sem nome'}`, 'info');
-                // Preencher campos de conexão
-                document.getElementById('credentials-input').value = 
-                    `Servidor: ${profile.host}\nUsuário: ${profile.username}\nSenha: ${profile.password}`;
-            } else {
-                log('❌ Perfil não encontrado', 'error');
-            }
-        }
-
-        function renderProfiles() {
-            const container = document.getElementById('profiles-list');
-            const noProfiles = document.getElementById('no-profiles');
-
-            if (profiles.length === 0) {
-                noProfiles.style.display = 'block';
-                container.style.display = 'none';
-                return;
-            }
-
-            noProfiles.style.display = 'none';
-            container.style.display = 'grid';
-
-            container.innerHTML = profiles.map(profile => {
-                const isSelected = editingProfileId === profile.id ? 'selected' : '';
-                const statusClass = `status-${profile.status || 'unknown'}`;
-
-                return `
-                    <div class="profile-card ${isSelected}" onclick="selectProfile('${profile.id}')">
-                        <div class="profile-header">
-                            <div class="profile-name">${profile.name || 'Perfil Sem Nome'}</div>
-                            <div class="profile-actions">
-                                <button class="profile-btn danger" onclick="deleteProfile('${profile.id}')">🗑️</button>
-                            </div>
-                        </div>
-                        <div class="profile-server">${profile.host}:${profile.port || '80'}</div>
-                        <div class="profile-user">${profile.username}</div>
-                        <div class="profile-status ${statusClass}"></div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Carregar credenciais salvas
-        function loadSavedCredentials() {
-            try {
-                const saved = localStorage.getItem(STORAGE_KEY);
-                if (saved) {
-                    savedCredentials = JSON.parse(saved);
-                    log('💾 Credenciais carregadas do armazenamento local', 'info');
-                    return savedCredentials;
-                }
-            } catch (e) {
-                log(`❌ Erro ao carregar credenciais: ${e.message}`, 'error');
-                return null;
-            }
-        }
-
-        // Limpar credenciais salvas
-        function clearSavedCredentials() {
-            try {
-                localStorage.removeItem(STORAGE_KEY);
-                savedCredentials = null;
-                document.getElementById('remember-me').checked = false;
-                document.getElementById('credentials-input').value = '';
-                log('🗑️ Credenciais limpas do armazenamento', 'info');
-                showToast('Credenciais limpas');
-            } catch (e) {
-                log(`❌ Erro ao limpar credenciais: ${e.message}`, 'error');
-            }
-        }
-
-        // Toggle "Manter Conectado"
-        function toggleRememberMe() {
-            const checkbox = document.getElementById('remember-me');
-            const profilesDiv = document.getElementById('saved-profiles');
-
-            if (checkbox.checked) {
-                profilesDiv.style.display = 'flex';
-                log('✅ "Manter conectado" ativado', 'info');
-            } else {
-                profilesDiv.style.display = 'none';
-                log('❌ "Manter conectado" desativado', 'info');
-            }
-        }
-
-        // Mostrar modal de perfis salvos
-        function showProfiles() {
-            const saved = loadSavedCredentials();
-            if (!saved || !saved.remember) {
-                showToast('Nenhum perfil salvo com "Manter conectado"');
-                return;
-            }
-
-            const message = `
-                📱 Credenciais Salvas
-
-                Servidor: ${saved.host}
-                Usuário: ${saved.username}
-                Senha: ****${saved.password.slice(-2)}
-                Salvas em: ${new Date(saved.savedAt).toLocaleString('pt-BR')}
-
-                ✅ Estas credenciais serão preenchidas automaticamente na próxima vez!
-                💡 Na TV Android, elas estarão disponíveis.
-
-                ------------------
-
-                Deseja limpar estas credenciais salvas?
-                [Sim] - Elas não serão mais preenchidas
-                [Não] - Cancelar
-            `;
-
-            if (confirm(message)) {
-                clearSavedCredentials();
-            }
-        }
-
-        // Detectar plataforma
-        function detectPlatform() {
-            const userAgent = navigator.userAgent;
-            let platform = 'desktop';
-            let os = 'Unknown';
-            let icon = '💻';
-
-            // Detectar SO
-            if (/Android/i.test(userAgent)) {
-                os = 'Android';
-                platform = 'android';
-                icon = '🤖';
-            } else if (/iPhone|iPad|iPod/i.test(userAgent)) {
-                os = 'iOS';
-                platform = 'ios';
-                icon = '🍎';
-            } else if (/Windows/i.test(userAgent)) {
-                os = 'Windows';
-                icon = '🪟';
-            } else if (/Mac/i.test(userAgent)) {
-                os = 'macOS';
-                icon = '🍎';
-            } else if (/Linux/i.test(userAgent)) {
-                os = 'Linux';
-                icon = '🐧';
-            }
-
-            return { platform, os, icon, userAgent };
-        }
-
-        // Inicializar detecção de plataforma
-        window.onload = function() {
-            const { os, icon, userAgent } = detectPlatform();
-            platform = os.toLowerCase();
-
-            document.getElementById('device-icon').textContent = icon;
-            document.getElementById('platform-name').textContent = os;
-            document.getElementById('os-badge').textContent = platform === 'android' ? 'Android' :
-                                                            platform === 'ios' ? 'iOS' :
-                                                            'Desktop';
-
-            log(`Plataforma detectada: ${os}`, 'info');
-            log(`User Agent: ${userAgent.substring(0, 100)}...`, 'info');
-
-            // Carregar credenciais salvas
-            const saved = loadSavedCredentials();
-            if (saved && saved.remember) {
-                document.getElementById('credentials-input').value = `Servidor: ${saved.host}\nUsuário: ${saved.username}\nSenha: ${saved.password}\n`;
-                document.getElementById('remember-me').checked = true;
-                log('💾 Credenciais salvas carregadas e preenchidas automaticamente', 'info');
-                showSavedProfilesIndicator();
-            }
-
-            log('✅ Sistema inicializado. Pronto para conectar.', 'success');
-        };
-
-        // Mostrar indicador de credenciais salvas
-        function showSavedProfilesIndicator() {
-            const connectionSection = document.getElementById('connection-section');
-            if (!connectionSection.querySelector('.saved-indicator')) {
-                const indicator = document.createElement('div');
-                indicator.className = 'saved-indicator';
-                indicator.style.cssText = `
-                    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
-                    color: white;
-                    padding: 8px 16px;
-                    border-radius: 8px;
-                    font-size: 13px;
-                    font-weight: 600;
-                    margin-top: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                `;
-                indicator.innerHTML = '💾 Credenciais salvas nesta TV Android';
-                connectionSection.insertBefore(indicator, connectionSection.firstChild.nextSibling);
-            }
-        }
-
-        // Funções auxiliares
-        function showElement(id) {
-            document.getElementById(id).classList.remove('hidden');
-        }
-
-        function hideElement(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function log(message, type = 'info') {
+        function log(msg) {
             const logBox = document.getElementById('log-output');
             const time = new Date().toLocaleTimeString();
-            const icons = {
-                info: 'ℹ️',
-                success: '✅',
-                error: '❌',
-                warning: '⚠️'
-            };
-
-            logBox.innerHTML += `<div class="log-entry">
-                <span class="log-time">[${time}]</span>
-                <span class="log-type status-${type}">${icons[type]}</span>
-                <span>${message}</span>
-            </div>`;
+            logBox.innerHTML += `<div class="log-entry">[${time}] ${msg}</div>`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        function setLoading(loading) {
-            const loadingEl = document.getElementById('loading');
-            if (loading) {
-                loadingEl.classList.remove('hidden');
-            } else {
-                loadingEl.classList.add('hidden');
-            }
-        }
+        function show(id) { document.getElementById(id).classList.remove('hidden'); }
+        function hide(id) { document.getElementById(id).classList.add('hidden'); }
 
-        function showToast(message, duration = 3000) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-        }
+        async function connect() {
+            const text = document.getElementById('credentials-input').value;
 
-        // Proxy do backend
-        async function proxyFetch(targetUrl) {
-            const proxyUrl = `/api/iptv/proxy?url=${encodeURIComponent(targetUrl)}`;
-            log(`🔄 Proxy request: ${targetUrl.substring(0, 80)}...`, 'info');
-
-            try {
-                const response = await fetch(proxyUrl);
-                if (!response.ok) {
-                    throw new Error(`Proxy returned ${response.status}`);
-                }
-                return await response.json();
-            } catch (e) {
-                log(`❌ Proxy failed: ${e.message}`, 'error');
-                throw e;
-            }
-        }
-
-        // Parser de credenciais
-        function parseCredentials(text) {
+            // Parse credentials
             const lines = text.split('\n');
-            let extractedHost = '';
-            let extractedUser = '';
-            let extractedPass = '';
-
             lines.forEach(line => {
                 const lower = line.toLowerCase().trim();
                 if (lower.includes('servidor:') || lower.includes('*servidor:')) {
                     const match = line.match(/[:*]\s*([^:\s]+)/);
-                    if (match) extractedHost = match[1].trim();
-                }
-                if (lower.includes('m3u+:')) {
-                    const urlMatch = line.match(/https?:\/\/([^\/]+)/);
-                    if (urlMatch) extractedHost = urlMatch[1].trim();
+                    if (match) host = match[1].trim();
                 }
                 if (lower.includes('usuário:') || lower.includes('usuario:') || lower.includes('*usuário:') || lower.includes('*usuario:')) {
                     const match = line.match(/[:*]\s*([^\s]+)/);
-                    if (match) extractedUser = match[1].trim();
+                    if (match) username = match[1].trim();
                 }
                 if (lower.includes('senha:') || lower.includes('*senha:')) {
                     const match = line.match(/[:*]\s*([^\s]+)/);
-                    if (match) extractedPass = match[1].trim();
+                    if (match) password = match[1].trim();
+                }
+                if (lower.includes('m3u+:')) {
+                    const urlMatch = line.match(/https?:\/\/([^\/]+)/);
+                    if (urlMatch) host = urlMatch[1].trim();
+                }
+                if (lower.includes('get.php')) {
+                    const urlMatch = line.match(/username=([^&]+)/);
+                    if (urlMatch) username = urlMatch[1].trim();
+                    const passMatch = line.match(/password=([^&]+)/);
+                    if (passMatch) password = passMatch[1].trim();
                 }
             });
 
-            return { host: extractedHost, username: extractedUser, password: extractedPass };
-        }
-
-        // Conectar
-        async function connect() {
-            const text = document.getElementById('credentials-input').value.trim();
-            if (!text) {
-                showToast('Por favor, cole suas credenciais');
-                return;
-            }
-
-            const creds = parseCredentials(text);
-            if (!creds.host || !creds.username || !creds.password) {
-                showToast('Não foi possível extrair as credenciais');
-                return;
-            }
-
-            host = creds.host;
-            username = creds.username;
-            password = creds.password;
-
-            // Salvar credenciais se checkbox marcado
-            const rememberMe = document.getElementById('remember-me').checked;
-            if (rememberMe) {
-                saveCredentials(host, username, password, true);
-                showSavedProfilesIndicator();
-            } else {
-                // Limpar credenciais salvas se não marcado
-                const saved = loadSavedCredentials();
-                if (saved) {
-                    clearSavedCredentials();
-                }
-            }
-
-            setLoading(true);
-            hideElement('categories-section');
-            hideElement('channels-section');
-            hideElement('selected-channel');
-
-            try {
-                const cleanHost = host.split(':')[0];
-                const baseUrl = `http://${cleanHost}:80`;
-
-                log(`🔗 Conectando em: ${baseUrl}`, 'info');
-
-                const categoriesUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_categories`;
-                const data = await proxyFetch(categoriesUrl);
-
-                if (Array.isArray(data)) {
-                    log(`✓ Recebidas ${data.length} categorias`, 'success');
-
-                    categories = data.filter(cat => {
-                        const name = (cat.category_name || '').toLowerCase();
-                        const isExcluded = EXCLUDED_CATS.some(e => name.includes(e));
-                        const isBrazilian = BRAZIL_KEYWORDS.some(kw => name.includes(kw));
-                        return isBrazilian && !isExcluded;
-                    });
-
-                    if (categories.length === 0) {
-                        throw new Error('Nenhuma categoria brasileira encontrada');
-                    }
-
-                    renderCategories();
-                    showElement('categories-section');
-                    log(`✓ ${categories.length} categorias carregadas!`, 'success');
-                } else {
-                    throw new Error('Resposta inválida do servidor');
-                }
-
-            } catch (err) {
-                showToast(`Erro: ${err.message}`);
-                log(`❌ ${err.message}`, 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        // Renderizar categorias
-        function renderCategories() {
-            const grid = document.getElementById('categories-grid');
-            grid.innerHTML = categories.map(cat => `
-                <button class="category-btn" onclick="loadStreams('${cat.category_id}', '${cat.category_name}')">
-                    ${cat.category_name}
-                </button>
-            `).join('');
-        }
-
-        // Carregar canais
-        async function loadStreams(categoryId, categoryName) {
-            setLoading(true);
-            hideElement('channels-section');
-            hideElement('selected-channel');
-
-            log(`📺 Carregando canais: ${categoryName}`, 'info');
-
-            try {
-                const cleanHost = host.split(':')[0];
-                const baseUrl = `http://${cleanHost}:80`;
-
-                const streamsUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${categoryId}`;
-                const data = await proxyFetch(streamsUrl);
-
-                if (Array.isArray(data)) {
-                    log(`✓ Recebidos ${data.length} canais`, 'success');
-
-                    allChannels = data.map(s => ({
-                        id: s.stream_id,
-                        name: s.name,
-                        url: `${baseUrl}/live/${username}/${password}/${s.stream_id}.m3u8`
-                    }));
-
-                    renderChannels();
-                    showElement('channels-section');
-                    log(`✓ ${allChannels.length} canais carregados!`, 'success');
-                } else {
-                    throw new Error('Resposta inválida do servidor');
-                }
-
-            } catch (err) {
-                showToast(`Erro: ${err.message}`);
-                log(`❌ ${err.message}`, 'error');
-            } finally {
-                setLoading(false);
-            }
-        }
-
-        // Renderizar canais
-        function renderChannels() {
-            const list = document.getElementById('channel-list-items');
-
-            if (allChannels.length === 0) {
-                list.innerHTML = '<div style="padding: 24px; text-align: center; color: rgba(255,255,255,0.5);">Nenhum canal encontrado</div>';
-                return;
-            }
-
-            list.innerHTML = allChannels.map(ch => `
-                <div class="channel-item" onclick="selectChannel('${ch.id}', '${ch.name}', '${ch.url}')">
-                    <div style="font-weight: 600; font-size: 18px; margin-bottom: 4px;">${ch.name}</div>
-                    <div style="font-size: 13px; color: rgba(255,255,255,0.6);">ID: ${ch.id}</div>
-                </div>
-            `).join('');
-        }
-
-        // Selecionar canal
-        function selectChannel(id, name, url) {
-            selectedChannel = { id, name, url };
-
-            log(`📺 Canal selecionado: ${name}`, 'info');
-
-            document.getElementById('channel-name').textContent = name;
-            document.getElementById('stream-url').textContent = url;
-
-            // Marcar como selecionado
-            document.querySelectorAll('.channel-item').forEach(item => {
-                item.classList.remove('selected');
-            });
-            event.currentTarget.classList.add('selected');
-
-            showElement('selected-channel');
-            
-            // Scroll para o canal selecionado
-            document.getElementById('selected-channel').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        // ============================================
-        // MÉTODOS DE TRANSMISSÃO UNIVERSAL
-        // ============================================
-
-        // 1. TRANSMISSÃO UNIVERSAL (tenta todos os métodos)
-        function universalCast() {
-            if (!selectedChannel) {
-                showToast('Selecione um canal primeiro');
-                return;
-            }
-
-            const url = selectedChannel.url;
-            log(`🚀 Iniciando Transmissão Universal...`, 'info');
-            log(`   Canal: ${selectedChannel.name}`, 'info');
-
-            let success = false;
-            const methods = [];
-
-            // Método 1: Web Video Caster (CORRIGIDO)
-            try {
-                log(`   Tentando Web Video Caster...`, 'info');
-                const wvcUrl = `wvc-x-callback://open?url=${encodeURIComponent(url)}`;
-                window.location.href = wvcUrl;
-                methods.push('Web Video Caster');
-                success = true;
-            } catch (e) {
-                log(`   Web Video Caster falhou: ${e.message}`, 'warning');
-            }
-
-            // Se WVC falhou e for mobile, tentar outros
-            if (!success && platform !== 'desktop') {
-                // Método 2: VLC (Android)
-                if (platform === 'android') {
-                    try {
-                        log(`   Tentando VLC Android...`, 'info');
-                        const vlcUrl = `vlc://${url}`;
-                        window.location.href = vlcUrl;
-                        methods.push('VLC Android');
-                        success = true;
-                    } catch (e) {
-                        log(`   VLC Android falhou: ${e.message}`, 'warning');
-                    }
-                }
-
-                // Método 3: VLC (iOS) - usa x-callback
-                if (platform === 'ios') {
-                    try {
-                        log(`   Tentando VLC iOS...`, 'info');
-                        const vlcUrl = `vlc-x-callback://x-callback-url/${encodeURIComponent(url)}`;
-                        window.location.href = vlcUrl;
-                        methods.push('VLC iOS');
-                        success = true;
-                    } catch (e) {
-                        log(`   VLC iOS falhou: ${e.message}`, 'warning');
-                    }
-                }
-            }
-
-            // Método 4: Intent Android universal
-            if (!success && platform === 'android') {
-                try {
-                    log(`   Tentando Intent universal Android...`, 'info');
-                    const intentUrl = `intent://${url}#Intent;scheme=http;type=video/mp2t;end`;
-                    window.location.href = intentUrl;
-                    methods.push('Intent Android');
-                    success = true;
-                } catch (e) {
-                    log(`   Intent Android falhou: ${e.message}`, 'warning');
-                }
-            }
-
-            if (success) {
-                log(`✓ Transmissão iniciada via: ${methods.join(', ')}`, 'success');
-                showToast('Tentando abrir player...');
-            } else {
-                log(`❌ Todos os métodos falharam`, 'error');
-                showToast('Use "Copiar URL" manualmente');
-            }
-        }
-
-        // 2. WEB VIDEO CASTER (MÉTODO CORRIGIDO)
-        function openInWebVideoCaster() {
-            if (!selectedChannel) {
-                showToast('Selecione um canal primeiro');
-                return;
-            }
-
-            const url = selectedChannel.url;
-            log(`📺 Abrindo Web Video Caster: ${selectedChannel.name}`, 'info');
-
-            // MÉTODO CORRIGIDO: wvc-x-callback://open?url=...
-            const wvcUrl = `wvc-x-callback://open?url=${encodeURIComponent(url)}`;
-            
-            log(`   URL Scheme: ${wvcUrl}`, 'info');
-
-            // Tentar múltiplos métodos
-            let success = false;
-
-            // Método 1: window.location
-            try {
-                window.location.href = wvcUrl;
-                log(`   ✓ window.location.href`, 'success');
-                success = true;
-            } catch (e) {
-                log(`   ⚠️ window.location falhou`, 'warning');
-            }
-
-            // Método 2: setTimeout + window.location (fallback)
-            setTimeout(() => {
-                try {
-                    window.location.href = wvcUrl;
-                    log(`   ✓ window.location (timeout)`, 'success');
-                } catch (e) {
-                    log(`   ⚠️ window.location (timeout) falhou`, 'warning');
-                }
-            }, 100);
-
-            // Método 3: window.open (último fallback)
-            setTimeout(() => {
-                try {
-                    window.open(wvcUrl, '_blank');
-                    log(`   ✓ window.open`, 'success');
-                } catch (e) {
-                    log(`   ⚠️ window.open falhou`, 'warning');
-                }
-            }, 300);
-
-            // Método 4: Link web do WVC
-            setTimeout(() => {
-                try {
-                    const webUrl = `https://cast.webvideocaster.com/?url=${encodeURIComponent(url)}`;
-                    window.open(webUrl, '_blank');
-                    log(`   ✓ Web do WVC`, 'success');
-                } catch (e) {
-                    log(`   ⚠️ Web WVC falhou`, 'warning');
-                }
-            }, 500);
-
-            if (success) {
-                showToast('Tentando abrir Web Video Caster...');
-            } else {
-                showToast('Use "Copiar URL" se necessário');
-            }
-        }
-
-        // 3. VLC (MÉTODO UNIVERSAL)
-        function openInVLC() {
-            if (!selectedChannel) {
-                showToast('Selecione um canal primeiro');
-                return;
-            }
-
-            const url = selectedChannel.url;
-            log(`🍊 Abrindo VLC: ${selectedChannel.name}`, 'info');
-
-            // VLC usa vlc:// prefixo
-            const vlcUrl = `vlc://${url}`;
-            log(`   VLC URL: ${vlcUrl}`, 'info');
-
-            let success = false;
-
-            try {
-                window.location.href = vlcUrl;
-                log(`   ✓ window.location.href`, 'success');
-                success = true;
-            } catch (e) {
-                log(`   ⚠️ window.location falhou`, 'warning');
-            }
-
-            setTimeout(() => {
-                try {
-                    window.open(vlcUrl, '_blank');
-                    log(`   ✓ window.open`, 'success');
-                    success = true;
-                } catch (e) {
-                    log(`   ⚠️ window.open falhou`, 'warning');
-                }
-            }, 100);
-
-            if (success) {
-                showToast('Tentando abrir VLC...');
-            }
-        }
-
-        // 4. IPTV SMARTERS (Redireciona para app store)
-        function openInSmarters() {
-            if (!selectedChannel) {
-                showToast('Selecione um canal primeiro');
-                return;
-            }
-
-            log(`🎯 IPTV Smarters: ${selectedChannel.name}`, 'info');
-
-            // Para Android
-            if (platform === 'android') {
-                const androidUrl = 'https://play.google.com/store/apps/details?id=com.smarters.smarterspro';
-                log(`   Redirecionando para Google Play...`, 'info');
-                window.open(androidUrl, '_blank');
-                showToast('Instale IPTV Smarters Pro');
-            }
-            // Para iOS
-            else if (platform === 'ios') {
-                const iosUrl = 'https://apps.apple.com/app/smarters-iptv-pro-player/id6738712575';
-                log(`   Redirecionando para App Store...`, 'info');
-                window.open(iosUrl, '_blank');
-                showToast('Instale IPTV Smarters Pro');
-            }
-            // Para Desktop
-            else {
-                const webUrl = 'https://iptvsmarterspro.com/';
-                log(`   Redirecionando para website...`, 'info');
-                window.open(webUrl, '_blank');
-                showToast('Acesse o site do IPTV Smarters');
-            }
-
-            log(`💡 Dica: Adicione suas credenciais no IPTV Smarters`, 'info');
-        }
-
-        // 5. COPIAR URL
-        function copyUrl() {
-            if (!selectedChannel) {
-                showToast('Selecione um canal primeiro');
-                return;
-            }
-
-            const url = selectedChannel.url;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    log('✓ URL copiada', 'success');
-                    showToast('URL copiada!');
-                }).catch(err => {
-                    log(`❌ Erro ao copiar: ${err.message}`, 'error');
-                    copyUrlFallback(url);
-                });
-            } else {
-                copyUrlFallback(url);
-            }
-        }
-
-        function copyUrlFallback(url) {
-            const textarea = document.createElement('textarea');
-            textarea.value = url;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-
-            try {
-                document.execCommand('copy');
-                log('✓ URL copiada (fallback)', 'success');
-                showToast('URL copiada!');
-            } catch (err) {
-                log(`❌ Erro ao copiar (fallback): ${err.message}`, 'error');
-            }
-
-            document.body.removeChild(textarea);
-        }
-
-        // 6. GERAR QR CODE PARA TV ANDROID
-        function generateQRCode() {
             if (!host || !username || !password) {
-                showToast('Conecte-se primeiro');
+                log('❌ Credenciais inválidas');
                 return;
             }
 
-            log('📷 Gerando QR Code para TV Android...', 'info');
+            log('🔗 Conectando...');
+            hide('categories-section');
+            hide('channels-section');
+            hide('selected-channel');
+
+            // Fix port
+            if (!host.includes(':')) {
+                host += ':80';
+            }
 
             const cleanHost = host.split(':')[0];
-            const baseUrl = `http://${cleanHost}:80`;
-            const m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
+            const port = host.split(':')[1] || '80';
+            const baseUrl = `http://${cleanHost}:${port}`;
 
-            log(`🔗 M3U URL: ${m3uUrl}`, 'info');
-
-            // Gerar QR Code
+            // Load categories
+            show('loading');
             try {
-                const qrContainer = document.getElementById('qr-code');
-                qrContainer.innerHTML = '';
+                const catUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_categories`;
+                log(`📂 Carregando categorias...`);
+                const response = await fetch(`https://corsproxy.io/?` + encodeURIComponent(catUrl));
+                categories = await response.json();
 
-                const qrCode = new QRCode(m3uUrl, {
-                    width: 256,
-                    height: 256,
-                    colorDark: '#000000',
-                    colorLight: '#FFFFFF',
-                    correctLevel: QRCode.CorrectLevel.H
+                // Filter Brazilian
+                categories = categories.filter(cat => {
+                    const name = cat.category_name.toLowerCase();
+                    return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
+                           !EXCLUDED_CATS.some(ex => name.includes(ex));
                 });
 
-                qrCode.appendChild(qrCode);
+                // Also include important categories
+                categories = categories.filter(cat => {
+                    const name = cat.category_name.toLowerCase();
+                    return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
+                           !EXCLUDED_CATS.some(ex => name.includes(ex));
+                });
 
-                log('✓ QR Code gerado com sucesso!', 'success');
+                // Limit to top categories
+                categories = categories.slice(0, 50);
 
-                // Mostrar modal
-                const modal = document.getElementById('qr-modal');
-                modal.classList.add('active');
+                log(`✅ ${categories.length} categorias`);
+                renderCategories();
+                show('categories-section');
 
-                showToast('QR Code gerado! Escaneie na TV');
+                // Save M3U URL for QR
+                m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
+                log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
 
             } catch (e) {
-                log(`❌ Erro ao gerar QR Code: ${e.message}`, 'error');
-                showToast('Erro ao gerar QR Code');
+                log(`❌ Erro: ${e.message}`);
+            } finally {
+                hide('loading');
             }
         }
 
-        // Fechar modal QR
+        function renderCategories() {
+            const grid = document.getElementById('categories-grid');
+            grid.innerHTML = categories.map(cat =>
+                `<button class="category-btn" onclick="loadChannels(${cat.category_id})">${cat.category_name}</button>`
+            ).join('');
+        }
+
+        async function loadChannels(catId) {
+            const cat = categories.find(c => c.category_id === catId);
+            if (!cat) return;
+
+            log(`📺 Carregando canais: ${cat.category_name}`);
+            show('loading');
+            hide('channels-section');
+            hide('selected-channel');
+
+            try {
+                const cleanHost = host.split(':')[0];
+                const port = host.split(':')[1] || '80';
+                const baseUrl = `http://${cleanHost}:${port}`;
+                const url = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_streams&category_id=${catId}`;
+
+                const response = await fetch(`https://corsproxy.io/?` + encodeURIComponent(url));
+                allChannels = await response.json();
+
+                // Limit channels
+                allChannels = allChannels.slice(0, 200);
+                filteredChannels = [...allChannels];
+
+                log(`✅ ${allChannels.length} canais`);
+                document.getElementById('channel-count').textContent = allChannels.length;
+                renderChannels();
+                show('channels-section');
+
+            } catch (e) {
+                log(`❌ Erro: ${e.message}`);
+            } finally {
+                hide('loading');
+            }
+        }
+
+        function renderChannels() {
+            const list = document.getElementById('channel-list');
+            list.innerHTML = filteredChannels.map(ch =>
+                `<div class="channel-item ${selectedChannel?.stream_id === ch.stream_id ? 'selected' : ''}"
+                     onclick="selectChannel(${ch.stream_id})">${ch.name}</div>`
+            ).join('');
+        }
+
+        function filterChannels() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            filteredChannels = allChannels.filter(ch => ch.name.toLowerCase().includes(query));
+            renderChannels();
+        }
+
+        function selectChannel(streamId) {
+            selectedChannel = allChannels.find(ch => ch.stream_id === streamId);
+            if (!selectedChannel) return;
+
+            log(`🎯 Selecionado: ${selectedChannel.name}`);
+            document.getElementById('channel-name').textContent = selectedChannel.name;
+            document.getElementById('stream-url').textContent = selectedChannel.url;
+            show('selected-channel');
+            renderChannels();
+        }
+
+        // Universal player - auto-detects best method
+        function openUniversal() {
+            if (!selectedChannel) {
+                log('❌ Selecione um canal');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            const ua = navigator.userAgent.toLowerCase();
+            const isAndroid = ua.includes('android');
+            const isIOS = /iphone|ipad|ipod/.test(ua);
+
+            log(`🚀 Universal: ${selectedChannel.name}`);
+
+            if (isAndroid) {
+                // Try VLC first on Android
+                try {
+                    window.location.href = `vlc://${url}`;
+                    log('✅ VLC Android');
+                    return;
+                } catch (e) {}
+            }
+
+            if (isIOS) {
+                // Try VLC on iOS
+                try {
+                    window.location.href = `vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(url)}`;
+                    log('✅ VLC iOS');
+                    return;
+                } catch (e) {}
+            }
+
+            // Try Web Video Caster
+            try {
+                window.location.href = `wvc-x-callback://open?url=${encodeURIComponent(url)}`;
+                log('✅ WVC');
+                return;
+            } catch (e) {}
+
+            // Fallback: copy URL
+            copyUrl();
+        }
+
+        function openInVLC() {
+            if (!selectedChannel) {
+                log('❌ Selecione um canal');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            log(`🍊 VLC: ${selectedChannel.name}`);
+
+            try {
+                window.location.href = `vlc://${url}`;
+                log('✅ VLC');
+            } catch (e) {
+                log('❌ VLC falhou');
+            }
+        }
+
+        function openInJustPlayer() {
+            if (!selectedChannel) {
+                log('❌ Selecione um canal');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            log(`📱 JustPlayer: ${selectedChannel.name}`);
+
+            try {
+                // JustPlayer intent
+                const intent = `intent://x-callback-url/stream?url=${encodeURIComponent(url)}#Intent;scheme=justplayer;package=com.taktsoft.justplayer;end`;
+                window.location.href = intent;
+                log('✅ JustPlayer');
+            } catch (e) {
+                log('❌ JustPlayer não instalado');
+            }
+        }
+
+        function copyUrl() {
+            if (!selectedChannel) {
+                log('❌ Selecione um canal');
+                return;
+            }
+
+            const url = selectedChannel.url;
+            navigator.clipboard.writeText(url).then(() => {
+                log('✅ URL copiada');
+            }).catch(() => {
+                log('❌ Erro ao copiar');
+            });
+        }
+
+        // QR Code for TV
+        function generateQRCode() {
+            if (!m3uUrl) {
+                log('❌ Conecte primeiro');
+                return;
+            }
+
+            log('📺 Gerando QR Code...');
+
+            try {
+                const container = document.getElementById('qr-code');
+                container.innerHTML = '';
+
+                QRCode.toCanvas(container, m3uUrl, {
+                    width: 200,
+                    errorCorrectionLevel: 'H'
+                });
+
+                document.getElementById('qr-modal').classList.add('active');
+                log('✅ QR Code gerado');
+
+            } catch (e) {
+                log(`❌ Erro: ${e.message}`);
+            }
+        }
+
         function closeQRModal() {
-            const modal = document.getElementById('qr-modal');
-            modal.classList.remove('active');
-            log('📷 Modal QR Code fechado', 'info');
+            document.getElementById('qr-modal').classList.remove('active');
+        }
+
+        // Open M3U in JustPlayer from QR modal
+        function openM3UURL() {
+            log('📺 Abrindo M3U no JustPlayer...');
+            try {
+                const intent = `intent://x-callback-url/load?url=${encodeURIComponent(m3uUrl)}#Intent;scheme=justplayer;package=com.taktsoft.justplayer;end`;
+                window.location.href = intent;
+                log('✅ JustPlayer');
+            } catch (e) {
+                log('❌ JustPlayer não instalado');
+            }
+        }
+
+        // Open VLC intent
+        function openVLCIntent() {
+            log('🍊 Abrindo M3U no VLC TV...');
+            try {
+                const intent = `intent://x-callback-url/stream?url=${encodeURIComponent(m3uUrl)}#Intent;scheme=vlc;package=org.videolan.vlc;end`;
+                window.location.href = intent;
+                log('✅ VLC');
+            } catch (e) {
+                log('❌ VLC não instalado');
+            }
+        }
+
+        // Copy M3U URL
+        function copyM3UUrl() {
+            navigator.clipboard.writeText(m3uUrl).then(() => {
+                log('✅ URL M3U copiada');
+            }).catch(() => {
+                log('❌ Erro ao copiar');
+            });
         }
     </script>
 </body>
