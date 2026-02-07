@@ -146,89 +146,6 @@
             padding: 4px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 11px;
-        }
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-content {
-            background: #1e293b;
-            border-radius: 16px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        .modal-title { font-size: 20px; font-weight: 700; }
-        .modal-close {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            cursor: pointer;
-            font-size: 18px;
-            color: white;
-        }
-        .qr-container {
-            text-align: center;
-            padding: 16px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 12px;
-            margin-bottom: 16px;
-        }
-        .qr-code {
-            background: white;
-            padding: 12px;
-            border-radius: 10px;
-            display: inline-block;
-        }
-        .qr-instructions {
-            text-align: center;
-            font-size: 13px;
-            line-height: 1.5;
-            color: rgba(255,255,255,0.7);
-        }
-        .qr-instructions h3 {
-            color: #f59e0b;
-            font-size: 16px;
-            margin-bottom: 12px;
-        }
-        .qr-btn {
-            background: #22c55e;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 8px;
-        }
-        .qr-btn:hover { background: #16a34a; }
-        .qr-btn.secondary {
-            background: rgba(255,255,255,0.1);
-            margin-top: 12px;
-        }
-        .qr-btn.secondary:hover { background: rgba(255,255,255,0.2); }
-        .tab-btn {
             flex: 1;
             background: rgba(255,255,255,0.05);
             border: 2px solid rgba(255,255,255,0.1);
@@ -362,57 +279,11 @@ Senha: senha"></textarea>
             <div>Carregando...</div>
         </div>
 
-        <div class="card">
-            <button class="button" style="background: rgba(255,255,255,0.1);" onclick="generateQRCode()">
-                📺 QR Code para TV
-            </button>
-        </div>
 
-        <div class="log-box">
-            <div style="margin-bottom: 8px; color: #60a5fa; font-weight: 700;">Log</div>
-            <div id="log-output">Pronto.</div>
-        </div>
-    </div>
-
-    <!-- Modal QR Code -->
-    <div id="qr-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">📺 QR Code para TV</div>
-                <button class="modal-close" onclick="closeQRModal()">✕</button>
-            </div>
-
-            <div class="qr-container">
-                <div id="qr-code" class="qr-code"></div>
-            </div>
-
-            <div class="qr-instructions">
-                <h3>Opções para TV Android:</h3>
-                <p>Escaneie o QR Code ou clique abaixo:</p>
-
-                <button class="qr-btn" onclick="openM3UURL()">
-                    📺 Abrir M3U no JustPlayer
-                </button>
-                <button class="qr-btn secondary" onclick="openVLCIntent()">
-                    🍊 Abrir no VLC TV
-                </button>
-                <button class="qr-btn secondary" onclick="copyM3UUrl()">
-                    📋 Copiar URL M3U
-                </button>
-
-                <p style="margin-top: 16px; font-size: 11px; opacity: 0.6;">
-                    Escaneie ou use um app de leitor QR na TV
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         let host = '', username = '', password = '';
         let categories = [], allChannels = [], filteredChannels = [];
         let selectedChannel = null;
-        let m3uUrl = '';
         let autoConnect = false;
 
         const EXCLUDED_CATS = ['filme', 'movie', 'film', 'vod', 'series', 'series4k', '4kseries',
@@ -571,12 +442,12 @@ Senha: senha"></textarea>
             const port = host.split(':')[1] || '80';
             const baseUrl = `http://${cleanHost}:${port}`;
 
-            // Load categories
+            // Load categories - usar get_live_categories para canais ao vivo
             show('loading');
             try {
-                const catUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_categories`;
-                log(`📂 Carregando categorias...`);
-                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(catUrl)}`);
+                const catUrl = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_categories`;
+                log(`📂 Carregando categorias (ao vivo)...`);
+                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(catUrl)}`);
                 const responseData = await response.json();
 
                 console.log('📊 Resposta da API:', responseData);
@@ -608,19 +479,12 @@ Senha: senha"></textarea>
                         renderCategories();
                         show('categories-section');
 
-                        // Save M3U URL for QR
-                        m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
-                        log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
                         return;
                     }
 
                     log(`✅ ${categories.length} categorias brasileiras`);
                     renderCategories();
                     show('categories-section');
-
-                    // Save M3U URL for QR
-                    m3uUrl = `${baseUrl}/get.php?username=${username}&password=${password}&type=m3u_plus`;
-                    log(`📺 M3U: ${m3uUrl.substring(0, 50)}...`);
 
                     return;
                 }
@@ -629,12 +493,10 @@ Senha: senha"></textarea>
                 if (responseData.user_info && responseData.user_info.status) {
                     const status = responseData.user_info.status.toLowerCase();
                     if (status === 'active' || status === 'enabled') {
-                        // Credenciais VÁLIDAS mas servidor não retornou categorias
-                        // Isso pode significar que não há categorias ou o formato é diferente
-                        console.log('✅ Credenciais VÁLIDAS! Status:', status);
-                        console.log('⚠️ Servidor não retornou array de categorias');
+                        // Credenciais VÁLIDAS mas servidor não tem categorias live
                         log(`✅ Credenciais VÁLIDAS (${responseData.user_info.username})`);
-                        log('⚠️ Servidor não retornou categorias. Tente usar M3U direto.');
+                        log('⚠️ Nenhuma categoria de canais ao vivo encontrada');
+                        log('💡 Este servidor pode ter apenas VOD/Series');
                         hide('loading');
                         return;
                     } else {
@@ -662,15 +524,26 @@ Senha: senha"></textarea>
         function renderCategories() {
             const grid = document.getElementById('categories-grid');
             grid.innerHTML = categories.map(cat =>
-                `<button class="category-btn" onclick="loadChannels(${cat.category_id})">${cat.category_name}</button>`
+                `<button class="category-btn" onclick="loadChannels('${cat.category_id}')">${cat.category_name}</button>`
             ).join('');
         }
 
         async function loadChannels(catId) {
-            const cat = categories.find(c => c.category_id === catId);
-            if (!cat) return;
+            console.log('📦 loadChannels chamado com catId:', catId, 'tipo:', typeof catId);
+            console.log('📦 categories disponíveis:', categories.map(c => ({id: c.category_id, name: c.category_name})));
+
+            // Converter para número para garantir comparação correta
+            const catIdNum = parseInt(catId, 10);
+            const cat = categories.find(c => parseInt(c.category_id, 10) === catIdNum);
+            if (!cat) {
+                console.error('❌ Categoria não encontrada:', catId);
+                console.error('📦 IDs disponíveis:', categories.map(c => c.category_id));
+                log(`❌ Erro: Categoria ID ${catId} não encontrada`);
+                return;
+            }
 
             log(`📺 Carregando canais: ${cat.category_name}`);
+            console.log('📦 Category ID:', catId);
             show('loading');
             hide('channels-section');
             hide('selected-channel');
@@ -679,9 +552,13 @@ Senha: senha"></textarea>
                 const cleanHost = host.split(':')[0];
                 const port = host.split(':')[1] || '80';
                 const baseUrl = `http://${cleanHost}:${port}`;
-                const url = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_streams&category_id=${catId}`;
 
-                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(url)}`);
+                // Usar get_live_streams para canais ao vivo (XTream API)
+                const url = `${baseUrl}/player_api.php?username=${username}&password=${password}&action=get_live_streams&category_id=${catId}`;
+
+                console.log('📦 API URL:', url);
+                log(`📡 Buscando canais via XTream API...`);
+                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(url)}`);
                 const responseData = await response.json();
 
                 console.log('📊 Resposta canais:', responseData);
@@ -695,6 +572,7 @@ Senha: senha"></textarea>
                 }
 
                 allChannels = responseData;
+                console.log('📦 Total canais:', allChannels.length);
 
                 // Limit channels
                 allChannels = allChannels.slice(0, 200);
@@ -708,12 +586,18 @@ Senha: senha"></textarea>
 
                 log(`✅ ${allChannels.length} canais`);
                 document.getElementById('channel-count').textContent = allChannels.length;
+
+                console.log('📦 Renderizando canais...');
                 renderChannels();
+                console.log('📦 Mostrando channels-section...');
+
                 show('channels-section');
 
             } catch (e) {
+                console.error('❌ Erro ao carregar canais:', e);
                 log(`❌ Erro: ${e.message}`);
             } finally {
+                console.log('📦 Escondendo loading...');
                 hide('loading');
             }
         }
@@ -746,9 +630,18 @@ Senha: senha"></textarea>
             selectedChannel = allChannels.find(ch => ch.stream_id === streamId);
             if (!selectedChannel) return;
 
+            // Montar URL do stream usando formato XTream
+            // http://host:port/username/password/stream_id.m3u8
+            const cleanHost = host.split(':')[0];
+            const port = host.split(':')[1] || '80';
+            const streamUrl = `http://${cleanHost}:${port}/${username}/${password}/${streamId}.m3u8`;
+
+            // Adicionar URL ao objeto selecionado
+            selectedChannel.url = streamUrl;
+
             log(`🎯 Selecionado: ${selectedChannel.name}`);
             document.getElementById('channel-name').textContent = selectedChannel.name;
-            document.getElementById('stream-url').textContent = selectedChannel.url;
+            document.getElementById('stream-url').textContent = streamUrl;
             show('selected-channel');
             renderChannels();
         }
@@ -841,78 +734,6 @@ Senha: senha"></textarea>
             const url = selectedChannel.url;
             navigator.clipboard.writeText(url).then(() => {
                 log('✅ URL copiada');
-            }).catch(() => {
-                log('❌ Erro ao copiar');
-            });
-        }
-
-        // QR Code for TV
-        function generateQRCode() {
-            if (!m3uUrl) {
-                log('❌ Conecte primeiro');
-                return;
-            }
-
-            log('📺 Gerando QR Code...');
-
-            try {
-                const container = document.getElementById('qr-code');
-                container.innerHTML = '';
-
-                if (typeof QRCode !== 'undefined') {
-                    new QRCode(container, {
-                        text: m3uUrl,
-                        width: 200,
-                        height: 200,
-                        colorDark: "#000000",
-                        colorLight: "#ffffff",
-                        correctLevel: QRCode.CorrectLevel.M
-                    });
-                } else {
-                    console.error('❌ QRCode library not loaded');
-                    throw new Error('QRCode not available');
-                }
-
-                document.getElementById('qr-modal').classList.add('active');
-                log('✅ QR Code gerado');
-
-            } catch (e) {
-                log(`❌ Erro: ${e.message}`);
-            }
-        }
-
-        function closeQRModal() {
-            document.getElementById('qr-modal').classList.remove('active');
-        }
-
-        // Open M3U in JustPlayer from QR modal
-        function openM3UURL() {
-            log('📺 Abrindo M3U no JustPlayer...');
-            try {
-                const intent = `intent://x-callback-url/load?url=${encodeURIComponent(m3uUrl)}#Intent;scheme=justplayer;package=com.taktsoft.justplayer;end`;
-                window.location.href = intent;
-                log('✅ JustPlayer');
-            } catch (e) {
-                log('❌ JustPlayer não instalado');
-            }
-        }
-
-        // Open VLC intent
-        function openVLCIntent() {
-            log('🍊 Abrindo M3U no VLC TV...');
-            try {
-                const intent = `intent://x-callback-url/stream?url=${encodeURIComponent(m3uUrl)}#Intent;scheme=vlc;package=org.videolan.vlc;end`;
-                window.location.href = intent;
-                log('✅ VLC');
-            } catch (e) {
-                log('❌ VLC não instalado');
-            }
-        }
-
-        // Copy M3U URL
-        function copyM3UUrl() {
-            navigator.clipboard.writeText(m3uUrl).then(() => {
-                log('✅ URL M3U copiada');
             }).catch(() => {
                 log('❌ Erro ao copiar');
             });
@@ -1084,7 +905,7 @@ Senha: senha"></textarea>
 
             try {
                 const catUrl = `${baseUrl}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_categories`;
-                const response = await fetch(`/api/iptv/proxy-simple?url=${encodeURIComponent(catUrl)}`);
+                const response = await fetch(`/api/iptv/proxy-new?url=${encodeURIComponent(catUrl)}`);
 
                 if (!response.ok) {
                     return false;
