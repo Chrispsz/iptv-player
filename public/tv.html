@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Parear TV - IPTV Player</title>
+    <link rel="manifest" href="/manifest.json">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -18,28 +19,28 @@
             padding: 20px;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             width: 100%;
             text-align: center;
         }
         .logo {
-            font-size: 64px;
+            font-size: 80px;
             margin-bottom: 24px;
         }
         .title {
-            font-size: 36px;
+            font-size: 42px;
             font-weight: 700;
             margin-bottom: 16px;
         }
         .subtitle {
-            font-size: 20px;
+            font-size: 22px;
             color: rgba(255,255,255,0.7);
             margin-bottom: 40px;
         }
         .qr-container {
             background: white;
-            padding: 24px;
-            border-radius: 20px;
+            padding: 32px;
+            border-radius: 24px;
             display: inline-block;
             margin-bottom: 32px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -49,85 +50,201 @@
         }
         .session-code {
             background: rgba(255,255,255,0.1);
-            border: 2px solid rgba(255,255,255,0.2);
-            border-radius: 12px;
-            padding: 16px 32px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-radius: 16px;
+            padding: 20px 40px;
             display: inline-block;
             margin-bottom: 24px;
         }
         .session-code .label {
-            font-size: 14px;
+            font-size: 16px;
             color: rgba(255,255,255,0.6);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
         .session-code .code {
-            font-size: 42px;
+            font-size: 52px;
             font-weight: 700;
-            letter-spacing: 8px;
+            letter-spacing: 12px;
             font-family: monospace;
+        }
+        .status {
+            background: rgba(59, 130, 246, 0.2);
+            border: 3px solid #3b82f6;
+            border-radius: 16px;
+            padding: 20px 32px;
+            display: inline-block;
+            font-size: 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .status.connecting {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+        }
+        .status.connected {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.2);
+            animation: pulse-green 2s infinite;
+        }
+        .status.error {
+            border-color: #ef4444;
+            background: rgba(239, 68, 68, 0.2);
+            animation: pulse-red 2s infinite;
+        }
+        @keyframes pulse-green {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(34, 197, 94, 0);
+            }
+        }
+        @keyframes pulse-red {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+            }
+            50% {
+                box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
+            }
+        }
+        .connection-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding: 12px 24px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+        }
+        .indicator-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+        .indicator-dot.green {
+            background: #22c55e;
+            animation: pulse-green 2s infinite;
+        }
+        .indicator-dot.yellow {
+            background: #f59e0b;
+            animation: pulse-yellow 2s infinite;
+        }
+        @keyframes pulse-yellow {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.2);
+            }
+        }
+        .indicator-dot.red {
+            background: #ef4444;
+            animation: pulse-red 2s infinite;
+        }
+        .indicator-dot.gray {
+            background: #6b7280;
         }
         .steps {
             text-align: left;
             background: rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 24px;
+            border-radius: 16px;
+            padding: 32px;
             margin-bottom: 32px;
         }
         .step {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 16px;
+            margin-bottom: 20px;
         }
         .step:last-child { margin-bottom: 0; }
         .step-number {
             background: #3b82f6;
             color: white;
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             flex-shrink: 0;
+            font-size: 20px;
         }
         .step-text {
             color: rgba(255,255,255,0.8);
-            line-height: 1.5;
-            padding-top: 4px;
-        }
-        .status {
-            background: rgba(59, 130, 246, 0.2);
-            border: 2px solid #3b82f6;
-            border-radius: 12px;
-            padding: 16px 24px;
-            display: inline-block;
+            line-height: 1.6;
+            padding-top: 8px;
             font-size: 18px;
-            font-weight: 600;
-        }
-        .status.connected {
-            background: rgba(34, 197, 94, 0.2);
-            border-color: #22c55e;
         }
         .spinner {
-            border: 4px solid rgba(255,255,255,0.2);
-            border-top: 4px solid #3b82f6;
+            border: 6px solid rgba(255,255,255,0.2);
+            border-top: 6px solid #3b82f6;
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
+            margin: 0 auto 24px;
         }
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
         .hidden { display: none !important; }
-        @media (max-width: 640px) {
-            .title { font-size: 28px; }
-            .subtitle { font-size: 16px; }
-            .session-code .code { font-size: 32px; letter-spacing: 4px; }
+        .remember-option {
+            margin-bottom: 24px;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.3s;
+        }
+        .checkbox-label:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.3);
+        }
+        .checkbox {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 3px solid rgba(255,255,255,0.5);
+            background: transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .checkbox.checked {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+        .countdown {
+            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            margin-top: 16px;
+        }
+        @media (min-width: 1920px) {
+            .logo { font-size: 100px; }
+            .title { font-size: 52px; }
+            .subtitle { font-size: 26px; }
+            .qr-container { padding: 40px; }
+            #qr-code { width: 384px !important; height: 384px !important; }
+            .session-code .code { font-size: 64px; }
+            .status { font-size: 24px; padding: 24px 40px; }
+            .steps { padding: 40px; }
+            .step-number { width: 48px; height: 48px; font-size: 24px; }
+            .step-text { font-size: 20px; }
         }
     </style>
 </head>
@@ -136,7 +253,7 @@
         <!-- Estado: Carregando -->
         <div id="loading">
             <div class="spinner"></div>
-            <div class="subtitle">Preparando pareamento...</div>
+            <div class="subtitle" style="font-size: 24px;">Preparando pareamento...</div>
         </div>
 
         <!-- Estado: QR Code -->
@@ -145,13 +262,30 @@
             <div class="title">Parear TV</div>
             <div class="subtitle">Escaneie o QR Code com seu celular</div>
 
+            <div class="remember-option">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="remember-device" class="checkbox">
+                    <span>Lembrar este dispositivo (7 dias)</span>
+                </label>
+                <div class="countdown" id="countdown"></div>
+            </div>
+
             <div class="qr-container">
-                <canvas id="qr-code"></canvas>
+                <canvas id="qr-code" width="256" height="256"></canvas>
             </div>
 
             <div class="session-code">
                 <div class="label">Código da sessão</div>
                 <div class="code" id="session-code">------</div>
+            </div>
+
+            <div class="connection-indicator">
+                <div class="indicator-dot gray" id="server-dot"></div>
+                <span id="server-status">Servidor</span>
+                <div class="indicator-dot gray" id="socket-dot"></div>
+                <span id="socket-status">Conexão</span>
+                <div class="indicator-dot gray" id="mobile-dot"></div>
+                <span id="mobile-status">Celular</span>
             </div>
 
             <div class="status" id="connection-status">
@@ -192,6 +326,8 @@
         let socket = null;
         let sessionId = null;
         let pairingUrl = '';
+        let countdownTimer = null;
+        let countdownSeconds = 30 * 60; // 30 minutos
 
         // Obter URL base atual
         const baseUrl = window.location.origin;
@@ -199,9 +335,64 @@
         function show(id) { document.getElementById(id).classList.remove('hidden'); }
         function hide(id) { document.getElementById(id).classList.add('hidden'); }
 
+        // Atualizar indicadores de status
+        function updateStatus(serverStatus, socketStatus, mobileStatus) {
+            const serverDot = document.getElementById('server-dot');
+            const socketDot = document.getElementById('socket-dot');
+            const mobileDot = document.getElementById('mobile-dot');
+
+            // Server status
+            serverDot.className = 'indicator-dot ' + serverStatus;
+            // Socket status
+            socketDot.className = 'indicator-dot ' + socketStatus;
+            // Mobile status
+            mobileDot.className = 'indicator-dot ' + mobileStatus;
+        }
+
+        // Atualizar texto de status
+        function updateStatusText(text, type) {
+            const status = document.getElementById('connection-status');
+            status.textContent = text;
+            status.className = 'status ' + type;
+        }
+
+        // Countdown timer
+        function startCountdown() {
+            updateCountdown();
+
+            countdownTimer = setInterval(() => {
+                countdownSeconds--;
+                updateCountdown();
+
+                if (countdownSeconds <= 0) {
+                    clearInterval(countdownTimer);
+                    // Gerar novo QR Code automaticamente
+                    requestPairing();
+                }
+            }, 1000);
+        }
+
+        function updateCountdown() {
+            const minutes = Math.floor(countdownSeconds / 60);
+            const seconds = countdownSeconds % 60;
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) {
+                countdownEl.textContent = `Expira em: ${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Checkbox para lembrar dispositivo
+        document.getElementById('remember-device').addEventListener('change', (e) => {
+            console.log('📱 Lembrar dispositivo:', e.target.checked);
+        });
+
         // Conectar ao Socket.io
         function connectToServer() {
             console.log('🔗 Conectando ao servidor de pareamento...');
+
+            // Atualizar indicador: servidor aguardando
+            updateStatus('yellow', 'gray', 'gray');
+            updateStatusText('⏳ Conectando ao servidor...', 'connecting');
 
             socket = io('/?XTransformPort=3003', {
                 transports: ['websocket', 'polling'],
@@ -213,11 +404,17 @@
 
             socket.on('connect', () => {
                 console.log('✅ Conectado ao servidor');
+                // Atualizar indicador: servidor conectado
+                updateStatus('green', 'green', 'gray');
+                updateStatusText('✅ Conectado ao servidor', 'connected');
                 requestPairing();
             });
 
             socket.on('connect_error', (err) => {
                 console.error('❌ Erro de conexão:', err);
+                // Atualizar indicador: erro
+                updateStatus('red', 'red', 'red');
+                updateStatusText('❌ Erro de conexão. Tente recarregar a página.', 'error');
             });
 
             // TV recebe credenciais do celular
@@ -231,9 +428,22 @@
                     password: credentials.password,
                     m3uUrl: credentials.m3uUrl,
                     pairedAt: new Date().toISOString(),
+                    rememberDevice: document.getElementById('remember-device').checked,
                 };
 
                 localStorage.setItem('iptv_paired_credentials', JSON.stringify(savedCredentials));
+
+                // Se marcou "lembrar dispositivo", salva por 7 dias
+                if (savedCredentials.rememberDevice) {
+                    const expiry = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                    localStorage.setItem('iptv_device_expiry', expiry.toISOString());
+                    console.log('💾 Dispositivo lembrado por 7 dias');
+                }
+
+                // Parar countdown
+                if (countdownTimer) {
+                    clearInterval(countdownTimer);
+                }
 
                 // Mostra estado de sucesso
                 hide('qr-state');
@@ -250,14 +460,25 @@
             // Celular se conectou
             socket.on('session:mobile_connected', () => {
                 console.log('📱 Celular conectado!');
-                const status = document.getElementById('connection-status');
-                status.textContent = '📱 Celular conectado! Aguardando credenciais...';
-                status.classList.add('connected');
+                // Atualizar indicador: celular conectado
+                updateStatus('green', 'green', 'green');
+                updateStatusText('📱 Celular conectado! Aguardando credenciais...', 'connected');
+
+                // Resetar countdown para dar mais tempo
+                countdownSeconds = 30 * 60;
             });
 
             socket.on('disconnect', () => {
                 console.log('📴 Desconectado do servidor');
-                // Tenta reconectar automaticamente
+                // Atualizar indicador: desconectado
+                updateStatus('red', 'red', 'gray');
+                updateStatusText('❌ Desconectado. Tentando reconectar...', 'error');
+            });
+
+            socket.on('error', (err) => {
+                console.error('❌ Erro no socket:', err);
+                updateStatus('red', 'red', 'red');
+                updateStatusText('❌ Erro de conexão', 'error');
             });
         }
 
@@ -279,9 +500,16 @@
                 // Gerar QR Code
                 generateQRCode(pairingUrl);
 
+                // Iniciar countdown
+                countdownSeconds = 30 * 60; // 30 minutos
+                if (countdownTimer) clearInterval(countdownTimer);
+                startCountdown();
+
                 // Mostrar QR
                 hide('loading');
                 show('qr-state');
+
+                updateStatusText('⏳ Aguardando celular escanear o QR Code...', '');
             });
         }
 
@@ -290,6 +518,7 @@
             console.log('📷 Gerando QR Code...');
 
             const canvas = document.getElementById('qr-code');
+            const canvasContainer = canvas.parentElement;
 
             QRCode.toCanvas(canvas, url, {
                 width: 256,
@@ -308,8 +537,40 @@
             });
         }
 
+        // Verificar se já tem credenciais salvas (dispositivo lembrado)
+        function checkSavedCredentials() {
+            const saved = localStorage.getItem('iptv_paired_credentials');
+            const expiry = localStorage.getItem('iptv_device_expiry');
+
+            if (saved && expiry) {
+                const expiryDate = new Date(expiry);
+                const now = new Date();
+
+                if (now < expiryDate) {
+                    console.log('💾 Dispositivo lembrado, usando credenciais salvas');
+                    const credentials = JSON.parse(saved);
+
+                    // Redirecionar direto para o player
+                    const playerUrl = `/universal-player.html?host=${encodeURIComponent(credentials.host)}&user=${encodeURIComponent(credentials.username)}&pass=${encodeURIComponent(credentials.password)}`;
+                    window.location.href = playerUrl;
+                    return;
+                } else {
+                    // Expirou, limpar
+                    console.log('⏰ Dispositivo expirado, limpando...');
+                    localStorage.removeItem('iptv_paired_credentials');
+                    localStorage.removeItem('iptv_device_expiry');
+                }
+            }
+        }
+
         // Iniciar
-        connectToServer();
+        window.addEventListener('load', () => {
+            // Verificar se já tem credenciais salvas (pareamento permanente)
+            checkSavedCredentials();
+
+            // Se não tem, iniciar pareamento normal
+            connectToServer();
+        });
     </script>
 </body>
 </html>

@@ -228,6 +228,51 @@
             margin-top: 12px;
         }
         .qr-btn.secondary:hover { background: rgba(255,255,255,0.2); }
+        .tab-btn {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .tab-btn.active {
+            background: #3b82f6;
+            border-color: #3b82f6;
+        }
+        .channel-item-fav {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .favorite-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+        .favorite-btn:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+        }
+        .favorite-btn.is-favorite {
+            color: #fbbf24;
+        }
     </style>
 </head>
 <body>
@@ -255,8 +300,28 @@ Senha: senha"></textarea>
         </div>
 
         <div id="categories-section" class="card hidden">
-            <div style="margin-bottom: 12px; font-weight: 600;">Categorias:</div>
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button onclick="showTab('categories')" id="tab-categories" class="tab-btn active">📂 Categorias</button>
+                <button onclick="showTab('favorites')" id="tab-favorites" class="tab-btn">⭐ Favoritos</button>
+            </div>
             <div id="categories-grid" class="categories-grid"></div>
+        </div>
+
+        <div id="favorites-section" class="card hidden">
+            <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                <button onclick="showTab('categories')" id="tab-categories-fav" class="tab-btn">📂 Categorias</button>
+                <button onclick="showTab('favorites')" id="tab-favorites-fav" class="tab-btn active">⭐ Favoritos</button>
+            </div>
+            <input type="text" id="search-favorites" placeholder="Buscar favorito..."
+                   style="width: 100%; padding: 10px; border-radius: 8px; border: 2px solid #334155;
+                          background: #0f172a; color: #fff; margin-bottom: 12px;"
+                   oninput="filterFavorites()">
+            <div id="favorites-list" class="channel-list"></div>
+            <div id="no-favorites" class="hidden" style="text-align: center; padding: 40px; color: rgba(255,255,255,0.5);">
+                <div style="font-size: 48px; margin-bottom: 16px;">⭐</div>
+                <p>Nenhum favorito ainda</p>
+                <p style="font-size: 13px; margin-top: 8px;">Adicione canais aos favoritos clicando na ⭐</p>
+            </div>
         </div>
 
         <div id="channels-section" class="card hidden">
@@ -403,13 +468,23 @@ Senha: senha"></textarea>
 
         // Carregar credenciais salvas
         function loadSavedCredentials() {
-            const saved = localStorage.getItem('iptv_saved_credentials');
+            const saved = localStorage.getItem('iptv_all_credentials');
             if (saved) {
                 try {
-                    const credentials = JSON.parse(saved);
-                    const text = `Servidor: ${credentials.host}\nUsuário: ${credentials.username}\nSenha: ${credentials.password}`;
-                    document.getElementById('credentials-input').value = text;
-                    log('💾 Credenciais salvas carregadas');
+                    const credentialsList = JSON.parse(saved);
+
+                    // Mostrar modal ou preencher com a primeira
+                    if (credentialsList.length > 0) {
+                        const credentials = credentialsList[0];
+                        const text = `Servidor: ${credentials.host}\nUsuário: ${credentials.username}\nSenha: ${credentials.password}`;
+                        document.getElementById('credentials-input').value = text;
+
+                        if (credentialsList.length > 1) {
+                            log(`💾 ${credentialsList.length} credenciais salvas. Mostrando a primeira.`);
+                        } else {
+                            log('💾 Credencial salva carregada');
+                        }
+                    }
                 } catch (e) {
                     console.error('❌ Erro ao carregar salvas:', e);
                     log('❌ Erro ao carregar credenciais salvas');
@@ -431,6 +506,18 @@ Senha: senha"></textarea>
 
         async function connect() {
             const text = document.getElementById('credentials-input').value;
+
+            // Se não tem texto e há credenciais salvas, tentar automaticamente
+            if (!text.trim() && credentialsList.length > 0) {
+                log('🔄 Tentando credenciais salvas automaticamente...');
+                const success = await tryAllCredentials();
+                if (success) {
+                    hide('loading');
+                    show('categories-section');
+                    renderCategories();
+                }
+                return;
+            }
 
             // Parse credentials
             const lines = text.split('\n');
@@ -567,9 +654,19 @@ Senha: senha"></textarea>
 
         function renderChannels() {
             const list = document.getElementById('channel-list');
+            const favorites = getFavorites();
             list.innerHTML = filteredChannels.map(ch =>
                 `<div class="channel-item ${selectedChannel?.stream_id === ch.stream_id ? 'selected' : ''}"
-                     onclick="selectChannel(${ch.stream_id})">${ch.name}</div>`
+                     onclick="selectChannel(${ch.stream_id})">
+                    <div class="channel-item-fav">
+                        <span style="flex: 1;">${ch.name}</span>
+                        <button class="favorite-btn ${favorites.includes(ch.stream_id) ? 'is-favorite' : ''}"
+                                onclick="event.stopPropagation(); toggleFavorite(${ch.stream_id})"
+                                title="${favorites.includes(ch.stream_id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}">
+                            ${favorites.includes(ch.stream_id) ? '⭐' : '☆'}
+                        </button>
+                    </div>
+                </div>`
             ).join('');
         }
 
@@ -746,10 +843,211 @@ Senha: senha"></textarea>
             });
         }
 
+        // ==================== FAVORITOS ====================
+        function getFavorites() {
+            const saved = localStorage.getItem('iptv_favorites');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function toggleFavorite(streamId) {
+            const favorites = getFavorites();
+            const index = favorites.indexOf(streamId);
+
+            if (index >= 0) {
+                // Remover dos favoritos
+                favorites.splice(index, 1);
+                log('📌 Removido dos favoritos');
+            } else {
+                // Adicionar aos favoritos
+                favorites.push(streamId);
+                log('⭐ Adicionado aos favoritos');
+            }
+
+            localStorage.setItem('iptv_favorites', JSON.stringify(favorites));
+            renderChannels();
+            renderFavorites();
+        }
+
+        function showTab(tab) {
+            const catsSection = document.getElementById('categories-section');
+            const favsSection = document.getElementById('favorites-section');
+            const chansSection = document.getElementById('channels-section');
+
+            // Esconder todas as seções
+            hide('categories-section');
+            hide('favorites-section');
+            hide('channels-section');
+            hide('selected-channel');
+
+            // Atualizar botões das tabs
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${tab}-fav`)?.classList.add('active');
+            document.getElementById(`tab-${tab}`)?.classList.add('active');
+
+            if (tab === 'categories') {
+                show('categories-section');
+            } else if (tab === 'favorites') {
+                show('favorites-section');
+                renderFavorites();
+            }
+        }
+
+        function renderFavorites() {
+            const list = document.getElementById('favorites-list');
+            const favorites = getFavorites();
+            const allFavorites = allChannels.filter(ch => favorites.includes(ch.stream_id));
+
+            if (allFavorites.length === 0) {
+                hide('favorites-list');
+                show('no-favorites');
+                return;
+            }
+
+            hide('no-favorites');
+            show('favorites-list');
+
+            list.innerHTML = allFavorites.map(ch =>
+                `<div class="channel-item"
+                     onclick="selectChannel(${ch.stream_id})">
+                    <div class="channel-item-fav">
+                        <span style="flex: 1;">${ch.name}</span>
+                        <button class="favorite-btn is-favorite"
+                                onclick="event.stopPropagation(); toggleFavorite(${ch.stream_id})"
+                                title="Remover dos favoritos">
+                            ⭐
+                        </button>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        function filterFavorites() {
+            const query = document.getElementById('search-favorites').value.toLowerCase();
+            const favorites = getFavorites();
+            const allFavorites = allChannels.filter(ch =>
+                favorites.includes(ch.stream_id) && ch.name.toLowerCase().includes(query)
+            );
+
+            const list = document.getElementById('favorites-list');
+
+            if (allFavorites.length === 0) {
+                hide('favorites-list');
+                show('no-favorites');
+                return;
+            }
+
+            hide('no-favorites');
+            show('favorites-list');
+
+            list.innerHTML = allFavorites.map(ch =>
+                `<div class="channel-item"
+                     onclick="selectChannel(${ch.stream_id})">
+                    <div class="channel-item-fav">
+                        <span style="flex: 1;">${ch.name}</span>
+                        <button class="favorite-btn is-favorite"
+                                onclick="event.stopPropagation(); toggleFavorite(${ch.stream_id})"
+                                title="Remover dos favoritos">
+                            ⭐
+                        </button>
+                    </div>
+                </div>`
+            ).join('');
+        }
+
+        // ==================== VALIDAÇÃO AUTOMÁTICA ====================
+        let currentCredentialsIndex = 0;
+        let credentialsList = [];
+
+        function loadAllCredentials() {
+            const saved = localStorage.getItem('iptv_all_credentials');
+            if (saved) {
+                credentialsList = JSON.parse(saved);
+                console.log(`💾 ${credentialsList.length} credenciais salvas carregadas`);
+            }
+        }
+
+        async function tryAllCredentials() {
+            if (credentialsList.length === 0) {
+                console.log('❌ Nenhuma credencial salva para tentar');
+                return false;
+            }
+
+            for (let i = 0; i < credentialsList.length; i++) {
+                const credentials = credentialsList[i];
+                currentCredentialsIndex = i;
+
+                console.log(`🔄 Tentando credencial ${i + 1}/${credentialsList.length}...`);
+                log(`🔄 Tentando servidor: ${credentials.host}`);
+
+                const success = await testConnection(credentials);
+
+                if (success) {
+                    console.log(`✅ Credencial ${i + 1} funcionou!`);
+                    log(`✅ Conectado com sucesso!`);
+                    return true;
+                }
+            }
+
+            // Se chegou aqui, nenhuma funcionou
+            console.log('❌ Todas as credenciais falharam');
+            log('❌ Todas as credenciais salvas falharam. Por favor, insira novas credenciais.');
+
+            // Limpar credenciais salvas e pedir novas
+            localStorage.removeItem('iptv_all_credentials');
+            localStorage.removeItem('iptv_saved_credentials');
+            credentialsList = [];
+            currentCredentialsIndex = 0;
+
+            alert('Todas as credenciais salvas expiraram. Por favor, insira novas credenciais.');
+            return false;
+        }
+
+        async function testConnection(credentials) {
+            const cleanHost = credentials.host.split(':')[0];
+            const port = credentials.host.split(':')[1] || '80';
+            const baseUrl = `http://${cleanHost}:${port}`;
+
+            try {
+                const catUrl = `${baseUrl}/player_api.php?username=${credentials.username}&password=${credentials.password}&action=get_categories`;
+                const response = await fetch(`https://corsproxy.io/?` + encodeURIComponent(catUrl));
+
+                if (!response.ok) {
+                    return false;
+                }
+
+                const data = await response.json();
+
+                // Se recebeu um array válido, a conexão funcionou
+                if (Array.isArray(data) && data.length > 0) {
+                    // Atualizar variáveis globais
+                    host = credentials.host;
+                    username = credentials.username;
+                    password = credentials.password;
+
+                    // Carregar categorias
+                    categories = data.filter(cat => {
+                        const name = cat.category_name.toLowerCase();
+                        return BRAZIL_KEYWORDS.some(kw => name.includes(kw)) &&
+                               !EXCLUDED_CATS.some(ex => name.includes(ex));
+                    });
+
+                    categories = categories.slice(0, 50);
+
+                    return true;
+                }
+
+                return false;
+            } catch (e) {
+                console.error(`Erro ao testar conexão:`, e);
+                return false;
+            }
+        }
+
         // Inicializar
         window.addEventListener('load', () => {
             console.log('🚀 Player universal iniciado');
             loadCredentialsFromURL();
+            loadAllCredentials();
         });
     </script>
 </body>
